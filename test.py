@@ -3,6 +3,7 @@ import re
 import subprocess
 import sys
 
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QLabel,
@@ -13,12 +14,13 @@ from PyQt6.QtWidgets import (
 )
 
 
-class WiFiScanner(QWidget):
+class MasterWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Wi-Fi Scanner")
-        self.setGeometry(100, 100, 400, 300)
+        self.setWindowTitle("Wi-Fi Center")
+        self.setFixedSize(400, 300)
+        self.setWindowIcon(QIcon("assets/master_icon.png"))
 
         layout = QVBoxLayout()
 
@@ -91,6 +93,6 @@ class WiFiScanner(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = WiFiScanner()
+    window = MasterWindow()
     window.show()
     sys.exit(app.exec())

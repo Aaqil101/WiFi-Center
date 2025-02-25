@@ -15,7 +15,16 @@ from PyQt6.QtWidgets import (
 
 
 class MasterWindow(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initializes the MasterWindow class, setting up the UI components.
+
+        This method sets the window title, size, and icon. It also initializes
+        the layout and adds a label, a button to scan for Wi-Fi networks, and
+        a list widget to display the available networks.
+        Connects the scan button to the scan_wifi method to handle click events.
+        """
+
         super().__init__()
 
         self.setWindowTitle("Wi-Fi Center")

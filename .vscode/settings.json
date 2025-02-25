@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "bssid",
+        "CCMP",
+        "netsh",
+        "networksetup",
+        "nmcli",
+        "pywifi",
+        "removepreferredwirelessnetwork",
+        "setairportnetwork",
+        "wlan"
+    ]
+}

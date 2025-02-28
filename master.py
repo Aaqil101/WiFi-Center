@@ -1,6 +1,8 @@
+# In-Build Modules
 import subprocess
 import sys
 
+# PyQt6 Modules
 from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QRect, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (

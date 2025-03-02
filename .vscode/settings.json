@@ -1,13 +1,22 @@
 {
     "cSpell.words": [
+        "BLURBEHIND",
         "bssid",
         "CCMP",
+        "dwmapi",
+        "DWMW",
+        "Frameless",
+        "getwindowsversion",
+        "gridline",
+        "Komo",
         "lightgray",
         "netsh",
         "networksetup",
         "nmcli",
+        "Pixmap",
         "pywifi",
         "removepreferredwirelessnetwork",
+        "scrollbars",
         "setairportnetwork",
         "wlan"
     ]

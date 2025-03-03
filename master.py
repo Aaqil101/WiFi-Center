@@ -3,11 +3,7 @@ import subprocess
 import sys
 
 # PyQt6 Modules
-from PyQt6.QtCore import (
-    QAbstractTableModel,
-    Qt,
-    QTimer,
-)
+from PyQt6.QtCore import QAbstractTableModel, Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QIcon, QPainter, QRegion
 from PyQt6.QtWidgets import (
     QAbstractItemView,

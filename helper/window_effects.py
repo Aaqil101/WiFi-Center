@@ -148,7 +148,7 @@ def ApplyMica(
 
         if sys.platform == "win32" and sys.getwindowsversion().build >= 22000:
             Acp = AccentPolicy()
-            Acp.GradientColor = int("00cccccc", base=16)
+            Acp.GradientColor = int("10cccccc", base=16)
             Acp.AccentState = 5
             Acp.AccentPolicy = 19
 

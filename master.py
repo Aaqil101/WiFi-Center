@@ -76,7 +76,7 @@ class MasterWindow(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # Blur the window
-        GlobalBlur(HWND=hwnd, hexColor=False, Acrylic=True, Dark=True)
+        GlobalBlur(HWND=hwnd)
 
         self.initUI()
 

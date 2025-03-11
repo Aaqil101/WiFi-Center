@@ -48,7 +48,7 @@ def get_wifi_networks() -> list:
                 networks.append((ssid, signal))
                 ssid, signal = None, None  # Reset for next network
 
-        return networks
+        return networks[:6]
 
     except Exception as e:
         print(f"Error retrieving Wi-Fi networks: {e}")

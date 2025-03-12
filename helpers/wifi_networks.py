@@ -2,25 +2,26 @@
 import re
 import subprocess
 
+# External Modules
+import qtawesome as qta
+
 # PyQt6 Modules
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QLabel, QTableWidget, QTableWidgetItem
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QWidget
 
 
 def load_wifi_networks(table: QTableWidget) -> None:
-    networks = get_wifi_networks()
+    networks: list = get_wifi_networks()
     table.setRowCount(len(networks))
 
     for row, (ssid, strength) in enumerate(networks):
         table.setItem(row, 0, QTableWidgetItem(ssid))  # Set SSID
 
-        # Create QLabel for aligned icon + percentage
-        label = QLabel(get_signal_icon(strength))
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setTextFormat(Qt.TextFormat.RichText)  # Enable HTML rendering
+        # Create QWidget for aligned icon + percentage
+        widget: QWidget = get_signal_icon(strength)
 
-        # Insert QLabel in table
-        table.setCellWidget(row, 1, label)
+        # Insert QWidget in table
+        table.setCellWidget(row, 1, widget)
 
 
 def get_wifi_networks() -> list:
@@ -32,7 +33,7 @@ def get_wifi_networks() -> list:
             shell=True,
         )
         output: str = process.stdout
-        networks = []
+        networks: list = []
 
         ssid, signal = None, None
         for line in output.split("\n"):
@@ -55,48 +56,58 @@ def get_wifi_networks() -> list:
         return []
 
 
-def get_signal_icon(strength: int) -> str:
+def get_signal_icon(strength: int) -> QWidget:
     """
-    Returns an HTML formatted string representing the Wi-Fi signal strength icon and percentage.
+    Returns a QWidget containing an icon and a percentage label indicating the strength of the given Wi-Fi network.
 
-    Args:
-        strength: An integer representing the Wi-Fi signal strength as a percentage.
+    The icon is determined by the strength of the network, and is one of the following:
+        - Full Signal (>= 75%): mdi6.wifi-strength-4
+        - Strong Signal (>= 50%): mdi6.wifi-strength-3
+        - Medium Signal (>= 25%): mdi6.wifi-strength-2
+        - Weak Signal (>= 0%): mdi6.wifi-strength-1
+        - No Signal (< 0%): mdi6.wifi-strength-off
 
-    Returns:
-        A string containing an HTML span element with the corresponding icon and percentage,
-        styled with a color indicating the strength: green for full, orange for strong,
-        dark orange for medium, red for weak, and grey for no signal.
+    The percentage label is aligned with the icon and is displayed in white, with a bold font and a family of Cambria, Cochin, Georgia, Times, or Times New Roman.
+
+    :param strength: The strength of the Wi-Fi network as a percentage (0-100)
+    :return: A QWidget containing the icon and percentage label
     """
     if strength >= 75:
-        # Full Signal (Green)
-        icon = "󰤨"
-        color = "#00ff00"
+        # Full Signal
+        icon = qta.icon("mdi6.wifi-strength-4", color="#00ff00")
     elif strength >= 50:
-        # Strong Signal (Orange)
-        icon = "󰤥"
-        color = "#ffaa00"
+        # Strong Signal
+        icon = qta.icon("mdi6.wifi-strength-3", color="#ffaa00")
     elif strength >= 25:
-        # Medium Signal (Dark Orange)
-        icon = "󰤢"
-        color = "#ff6600"
+        # Medium Signal
+        icon = qta.icon("mdi6.wifi-strength-2", color="#ff6600")
     elif strength > 0:
-        # Weak Signal (Red)
-        icon = "󰤟"
-        color = "#ff0000"
+        # Weak Signal
+        icon = qta.icon("mdi6.wifi-strength-1", color="#ff0000")
     else:
-        # No Signal (Grey)
-        icon = "󰤭"
-        color = "#777777"
+        # No Signal
+        icon = qta.icon("mdi6.wifi-strength-off", color="#777777")
 
-    return f"""
-    <table style="width: 100%; border-collapse: collapse; text-align: center;">
-        <tr>
-            <td style="text-align: center; vertical-align: middle; width: 30px;">
-                <span style="color: {color}; font-size: 16px;">{icon}</span>
-            </td>
-            <td style="text-align: center; vertical-align: middle; padding-left: 10px; font-size: 14px;">
-                <b>{strength}%</b>
-            </td>
-        </tr>
-    </table>
-    """
+    icon_label = QLabel()
+    pixmap = icon.pixmap(16, 16)  # Adjust size if needed
+    icon_label.setPixmap(pixmap)
+
+    text_label = QLabel(f"{strength}%")
+    text_label.setStyleSheet(
+        """
+        color: rgb(255, 255, 255);
+        font-size: 14px;
+        font-weight: 700;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        """
+    )
+
+    container = QWidget()
+    layout = QHBoxLayout()
+    layout.addWidget(icon_label)
+    layout.addWidget(text_label)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    container.setLayout(layout)
+
+    return container

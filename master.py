@@ -58,12 +58,14 @@ class MasterWindow(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Read-only
 
         # ✨ Customize header
-        header: QHeaderView | None = self.table.horizontalHeader()
-        header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        header.setFixedHeight(30)  # Set header height
+        horizontal_header: QHeaderView | None = self.table.horizontalHeader()
+        horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        horizontal_header.setFixedHeight(30)  # Set header height
 
         get_and_apply_styles(
-            script_file=__file__, file="header.qss", set_content=header.setStyleSheet
+            script_file=__file__,
+            file="header.qss",
+            set_content=horizontal_header.setStyleSheet,
         )
 
         # 🚀 Disable selection completely
@@ -89,16 +91,10 @@ class MasterWindow(QWidget):
 
         # ®️ Remove row numbers and scrollbars
         self.table.verticalHeader().setVisible(False)
+        self.table.setShowGrid(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-        # Apply custom styles
-        get_and_apply_styles(
-            script_file=__file__,
-            file="wifi_table.qss",
-            set_content=self.table.setStyleSheet,
-        )
 
         # Command Bar
         self.command_bar = QLineEdit()
@@ -153,6 +149,13 @@ class MasterWindow(QWidget):
         is_windows_11: bool = windows_build >= 22000
 
         if is_windows_11:
+            # Style Sheet for Table on Windows 11
+            get_and_apply_styles(
+                script_file=__file__,
+                file="wifi_table_win11.qss",
+                set_content=self.table.setStyleSheet,
+            )
+
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
             get_and_apply_styles(
                 script_file=__file__,
@@ -161,6 +164,13 @@ class MasterWindow(QWidget):
             )
             Blur(self.winId())
         else:
+            # Style Sheet for Table on Windows 10
+            get_and_apply_styles(
+                script_file=__file__,
+                file="wifi_table_win10.qss",
+                set_content=self.table.setStyleSheet,
+            )
+
             get_and_apply_styles(
                 script_file=__file__,
                 file="win10.qss",
@@ -204,7 +214,9 @@ class MasterWindow(QWidget):
         # except subprocess.CalledProcessError as e:
         #     print(f"⚠ Error: {e}")
 
-        number = 1
+        import random
+
+        number: int = random.randint(0, 1)
 
         if number == 1:
             get_and_apply_styles(
@@ -226,7 +238,7 @@ class MasterWindow(QWidget):
         self.show_output_box_with_animation()
 
         # Hide the output box after 2 seconds
-        QTimer.singleShot(2000, self.hide_output_box_with_animation)
+        QTimer.singleShot(1000, self.hide_output_box_with_animation)
 
     def show_output_box_with_animation(self) -> None:
         self.output_box.show()
@@ -383,10 +395,19 @@ class MasterWindow(QWidget):
 
 
 def master():
+    from PyQt6.QtCore import QElapsedTimer
+
+    timer = QElapsedTimer()
+    timer.start()  # Start timing
+
     app = QApplication(sys.argv)
     window = MasterWindow()
     window.show()
     window.command_bar.setFocus()
+
+    elapsed_time: float = timer.elapsed() / 1000  # Convert to seconds
+    print(f"Launch time: {elapsed_time:.4f} seconds")
+
     sys.exit(app.exec())
 
 

@@ -24,9 +24,7 @@ class WINDOWCOMPOSITIONATTRIBDATA(ctypes.Structure):
     ]
 
 
-SetWindowCompositionAttribute: ctypes._NamedFuncPointer = (
-    user32.SetWindowCompositionAttribute
-)
+SetWindowCompositionAttribute = user32.SetWindowCompositionAttribute
 SetWindowCompositionAttribute.argtypes = (
     HWND,
     ctypes.POINTER(WINDOWCOMPOSITIONATTRIBDATA),

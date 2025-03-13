@@ -1,5 +1,7 @@
 # In-Build Modules
+import subprocess
 import sys
+from pathlib import Path
 
 # PyQt6 Modules
 from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QRect, Qt, QTimer
@@ -24,7 +26,10 @@ class MasterWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Wi-Fi Center")
         self.setFixedSize(600, 400)
-        self.setWindowIcon(QIcon("assets/master_icon.png"))
+
+        icon_path: Path = Path(__file__).parent / "assets" / "master_icon.png"
+
+        self.setWindowIcon(QIcon(str(icon_path)))
 
         self.initUI()
         load_wifi_networks(self.table)
@@ -53,20 +58,27 @@ class MasterWindow(QWidget):
         # Table
         self.table = QTableWidget()
         self.table.setColumnCount(2)
-        self.table.setFixedHeight(280)
+        self.table.setFixedHeight(325)
         self.table.setHorizontalHeaderLabels(["Network Name", "Signal Strength"])
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Read-only
 
-        # ✨ Customize header
-        horizontal_header: QHeaderView | None = self.table.horizontalHeader()
-        horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        horizontal_header.setFixedHeight(30)  # Set header height
-
-        get_and_apply_styles(
-            script_file=__file__,
-            file="header.qss",
-            set_content=horizontal_header.setStyleSheet,
+        self.table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Stretch
         )
+        self.table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch
+        )
+
+        # ✨ Customize header
+        # horizontal_header: QHeaderView | None = self.table.horizontalHeader()
+        # horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        # horizontal_header.setFixedHeight(30)  # Set header height
+
+        # get_and_apply_styles(
+        #     script_file=__file__,
+        #     file="header.qss",
+        #     set_content=horizontal_header.setStyleSheet,
+        # )
 
         # 🚀 Disable selection completely
         self.table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
@@ -91,7 +103,6 @@ class MasterWindow(QWidget):
 
         # ®️ Remove row numbers and scrollbars
         self.table.verticalHeader().setVisible(False)
-        self.table.setShowGrid(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -138,6 +149,43 @@ class MasterWindow(QWidget):
 
         self.apply_window_style()
         self.center_on_screen()
+
+    def testing(self) -> None:
+        import random
+
+        # Disable the command bar at the beginning of the function
+        self.command_bar.setDisabled(True)
+
+        number: int = random.randint(0, 1)
+
+        if number == 1:
+            get_and_apply_styles(
+                script_file=__file__,
+                file="output_box_success.qss",
+                set_content=self.output_box.setStyleSheet,
+            )
+            self.output_box.setPlainText("✅ Success")
+
+        if number == 0:
+            get_and_apply_styles(
+                script_file=__file__,
+                file="output_box_failure.qss",
+                set_content=self.output_box.setStyleSheet,
+            )
+            self.output_box.setPlainText("❌ Failure")
+
+        # Show the output box with animation
+        self.show_output_box_with_animation()
+
+        # Create a function to handle re-enabling the command bar
+        def enable_command_bar() -> None:
+            self.command_bar.setDisabled(False)
+            self.command_bar.setFocus()
+
+        # Hide the output box after 2 seconds and then enable the command bar
+        QTimer.singleShot(1000, self.hide_output_box_with_animation)
+        # Enable the command bar after the hide animation is complete (1400ms total)
+        QTimer.singleShot(1400, enable_command_bar)
 
     def apply_window_style(self) -> None:
         """
@@ -186,59 +234,59 @@ class MasterWindow(QWidget):
         y: int = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
 
-    def check_input(self):
+    def check_input(self) -> None:
         user_input: str = self.command_bar.text()
         self.command_bar.clear()
 
         if "d" in user_input.lower():
-            self.disconnect_wifi()
+            self.testing()
 
         if "q" in user_input.lower():
             QApplication.quit()
 
     def disconnect_wifi(self) -> None:
-        # try:
-        #     process = subprocess.run(
-        #         ["netsh", "wlan", "disconnect"],
-        #         shell=True,
-        #         capture_output=True,
-        #         text=True,
-        #     )
+        # Disable the command bar at the beginning of the function
+        self.command_bar.setDisabled(True)
 
-        #     if process.returncode == 0:
-        #         self.output_box.setPlainText("✅ Successfully disconnected from Wi-Fi.")
-        #     else:
-        #         self.output_box.setPlainText(
-        #             "❌ Failed to disconnect from Wi-Fi. Try running as administrator."
-        #         )
-        # except subprocess.CalledProcessError as e:
-        #     print(f"⚠ Error: {e}")
-
-        import random
-
-        number: int = random.randint(0, 1)
-
-        if number == 1:
-            get_and_apply_styles(
-                script_file=__file__,
-                file="output_box_success.qss",
-                set_content=self.output_box.setStyleSheet,
+        try:
+            process = subprocess.run(
+                ["netsh", "wlan", "disconnect"],
+                shell=True,
+                capture_output=True,
+                text=True,
             )
-            self.output_box.setPlainText("✅ Success")
 
-        if number == 0:
-            get_and_apply_styles(
-                script_file=__file__,
-                file="output_box_failure.qss",
-                set_content=self.output_box.setStyleSheet,
-            )
-            self.output_box.setPlainText("❌ Failure")
+            if process.returncode == 0:
+                get_and_apply_styles(
+                    script_file=__file__,
+                    file="output_box_success.qss",
+                    set_content=self.output_box.setStyleSheet,
+                )
+                self.output_box.setPlainText("✅ Successfully disconnected from Wi-Fi.")
+            else:
+                get_and_apply_styles(
+                    script_file=__file__,
+                    file="output_box_failure.qss",
+                    set_content=self.output_box.setStyleSheet,
+                )
+                self.output_box.setPlainText(
+                    "❌ Failed to disconnect from Wi-Fi. Try running as administrator."
+                )
+        except subprocess.CalledProcessError as e:
+            print(f"⚠ Error: {e}")
 
         # Show the output box with animation
         self.show_output_box_with_animation()
 
-        # Hide the output box after 2 seconds
+        def enable_command_bar() -> None:
+            self.command_bar.setDisabled(False)
+            self.command_bar.setFocus()
+
+        # Hide the output box after 2 seconds and then enable the command bar
         QTimer.singleShot(1000, self.hide_output_box_with_animation)
+
+        # Enable the command bar after the hide animation is complete (1400ms total)
+        QTimer.singleShot(1400, enable_command_bar)
 
     def show_output_box_with_animation(self) -> None:
         self.output_box.show()

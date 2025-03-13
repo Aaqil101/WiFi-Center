@@ -11,6 +11,12 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
 
 
 def load_wifi_networks(table: QTableWidget) -> None:
+    """
+    Populates a QTableWidget with the 6 strongest Wi-Fi networks in range, each with its signal strength as a percentage.
+
+    :param table: The QTableWidget to populate
+    :type table: QTableWidget
+    """
     networks: list = get_wifi_networks()
     table.setRowCount(len(networks))
 
@@ -25,6 +31,12 @@ def load_wifi_networks(table: QTableWidget) -> None:
 
 
 def get_wifi_networks() -> list:
+    """
+    Gets a list of the 6 strongest Wi-Fi networks in range. Returns a list of tuples, each containing the SSID and signal strength as a percentage.
+
+    :return: A list of tuples containing the SSID and signal strength as a percentage.
+    :rtype: list[tuple[str, int]]
+    """
     try:
         process: subprocess.CompletedProcess[str] = subprocess.run(
             ["netsh", "wlan", "show", "networks", "mode=bssid"],
@@ -108,6 +120,11 @@ def get_signal_icon(strength: int) -> QWidget:
     layout.addWidget(text_label)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    container.setStyleSheet(
+        """
+        background-color: transparent;
+        """
+    )
     container.setLayout(layout)
 
     return container

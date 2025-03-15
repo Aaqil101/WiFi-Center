@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Helpers Modules
-from helpers import get_and_apply_styles, load_wifi_networks
+from helpers import disconnect_wifi, get_and_apply_styles, load_wifi_networks
 
 
 class MasterWindow(QWidget):
@@ -177,22 +177,21 @@ class MasterWindow(QWidget):
         is_windows_11: bool = windows_build >= 22000
 
         if is_windows_11:
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
             get_and_apply_styles(
                 script_file=__file__,
                 set_content_funcs={
-                    "wifi_table_win11.qss": self.table.setStyleSheet,
                     "win11.qss": self.setStyleSheet,
+                    "wifi_table_win11.qss": self.table.setStyleSheet,
                 },
             )
-
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
             Blur(self.winId())
         else:
             get_and_apply_styles(
                 script_file=__file__,
                 set_content_funcs={
-                    "wifi_table_win10.qss": self.table.setStyleSheet,
                     "win10.qss": self.setStyleSheet,
+                    "wifi_table_win10.qss": self.table.setStyleSheet,
                 },
             )
 
@@ -210,56 +209,10 @@ class MasterWindow(QWidget):
         self.command_bar.clear()
 
         if "d" in user_input.lower():
-            self.testing()
+            disconnect_wifi(self)
 
         if "q" in user_input.lower():
             QApplication.quit()
-
-    def disconnect_wifi(self) -> None:
-        # Disable the command bar at the beginning of the function
-        self.command_bar.setDisabled(True)
-
-        try:
-            process = subprocess.run(
-                ["netsh", "wlan", "disconnect"],
-                shell=True,
-                capture_output=True,
-                text=True,
-            )
-
-            if process.returncode == 0:
-                get_and_apply_styles(
-                    script_file=__file__,
-                    set_content_funcs={
-                        "output_box_success.qss": self.output_box.setStyleSheet
-                    },
-                )
-                self.output_box.setPlainText("✅ Successfully disconnected from Wi-Fi.")
-            else:
-                get_and_apply_styles(
-                    script_file=__file__,
-                    set_content_funcs={
-                        "output_box_failure.qss": self.output_box.setStyleSheet
-                    },
-                )
-                self.output_box.setPlainText(
-                    "❌ Failed to disconnect from Wi-Fi. Try running as administrator."
-                )
-        except subprocess.CalledProcessError as e:
-            print(f"⚠ Error: {e}")
-
-        # Show the output box with animation
-        self.show_output_box_with_animation()
-
-        def enable_command_bar() -> None:
-            self.command_bar.setDisabled(False)
-            self.command_bar.setFocus()
-
-        # Hide the output box after 2 seconds and then enable the command bar
-        QTimer.singleShot(1000, self.hide_output_box_with_animation)
-
-        # Enable the command bar after the hide animation is complete (1400ms total)
-        QTimer.singleShot(1400, enable_command_bar)
 
     def show_output_box_with_animation(self) -> None:
         self.output_box.show()

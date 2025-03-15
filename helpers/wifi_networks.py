@@ -168,7 +168,7 @@ def get_wifi_networks() -> list:
         signal_pattern: re.Pattern[str] = re.compile(r"Signal\s*:\s*(\d+)%")
         security_pattern: re.Pattern[str] = re.compile(r"Authentication\s*:\s*(?!Open)")
 
-        networks = []
+        networks: list = []
         ssid = None
         requires_login = False  # True if network is secured and not saved
 
@@ -192,6 +192,9 @@ def get_wifi_networks() -> list:
 
                 networks.append((ssid, signal, requires_login))
                 ssid = None  # Reset for next network
+
+        # Sort networks by signal strength in descending order
+        networks.sort(key=lambda x: x[1], reverse=True)
 
         return networks[:6]
 

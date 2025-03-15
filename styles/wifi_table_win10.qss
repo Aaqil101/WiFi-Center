@@ -24,6 +24,7 @@ QHeaderView::section {
     color: #e0e0e0;
     padding: 6px;
     font-weight: 700;
+    font-family: Georgia, "Times New Roman", Times, serif;
     border: none;
     border-bottom: 2px solid #444;
 }

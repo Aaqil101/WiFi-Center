@@ -9,6 +9,7 @@
         "dwmapi",
         "DWMWA",
         "DWMWCP",
+        "funcs",
         "getwindowsversion",
         "netsh",
         "pixmap",

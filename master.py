@@ -41,12 +41,6 @@ class MasterWindow(QWidget):
         self.output_box.setFixedWidth(580)
         self.output_box.setReadOnly(True)
 
-        get_and_apply_styles(
-            script_file=__file__,
-            file="output_box.qss",
-            set_content=self.output_box.setStyleSheet,
-        )
-
         self.output_box.setVerticalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
@@ -61,24 +55,6 @@ class MasterWindow(QWidget):
         self.table.setFixedHeight(325)
         self.table.setHorizontalHeaderLabels(["Network Name", "Signal Strength"])
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Read-only
-
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Stretch
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Stretch
-        )
-
-        # ✨ Customize header
-        # horizontal_header: QHeaderView | None = self.table.horizontalHeader()
-        # horizontal_header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        # horizontal_header.setFixedHeight(30)  # Set header height
-
-        # get_and_apply_styles(
-        #     script_file=__file__,
-        #     file="header.qss",
-        #     set_content=horizontal_header.setStyleSheet,
-        # )
 
         # 🚀 Disable selection completely
         self.table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
@@ -113,12 +89,6 @@ class MasterWindow(QWidget):
         self.command_bar.setFixedHeight(40)
         self.command_bar.setPlaceholderText("Type here...")
 
-        get_and_apply_styles(
-            script_file=__file__,
-            file="command_bar.qss",
-            set_content=self.command_bar.setStyleSheet,
-        )
-
         self.command_bar.returnPressed.connect(self.check_input)
 
         # Layouts - Adjust to center align all elements
@@ -139,6 +109,14 @@ class MasterWindow(QWidget):
         table = QVBoxLayout()
         table.setAlignment(Qt.AlignmentFlag.AlignCenter)
         table.addWidget(self.table)
+
+        get_and_apply_styles(
+            script_file=__file__,
+            set_content_funcs={
+                "command_bar.qss": self.command_bar.setStyleSheet,
+                "output_box.qss": self.output_box.setStyleSheet,
+            },
+        )
 
         master_layout.addLayout(table)
         master_layout.addLayout(output_layout)
@@ -161,16 +139,18 @@ class MasterWindow(QWidget):
         if number == 1:
             get_and_apply_styles(
                 script_file=__file__,
-                file="output_box_success.qss",
-                set_content=self.output_box.setStyleSheet,
+                set_content_funcs={
+                    "output_box_success.qss": self.output_box.setStyleSheet
+                },
             )
             self.output_box.setPlainText("✅ Success")
 
         if number == 0:
             get_and_apply_styles(
                 script_file=__file__,
-                file="output_box_failure.qss",
-                set_content=self.output_box.setStyleSheet,
+                set_content_funcs={
+                    "output_box_failure.qss": self.output_box.setStyleSheet
+                },
             )
             self.output_box.setPlainText("❌ Failure")
 
@@ -197,32 +177,23 @@ class MasterWindow(QWidget):
         is_windows_11: bool = windows_build >= 22000
 
         if is_windows_11:
-            # Style Sheet for Table on Windows 11
             get_and_apply_styles(
                 script_file=__file__,
-                file="wifi_table_win11.qss",
-                set_content=self.table.setStyleSheet,
+                set_content_funcs={
+                    "wifi_table_win11.qss": self.table.setStyleSheet,
+                    "win11.qss": self.setStyleSheet,
+                },
             )
 
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-            get_and_apply_styles(
-                script_file=__file__,
-                file="win11.qss",
-                set_content=self.setStyleSheet,
-            )
             Blur(self.winId())
         else:
-            # Style Sheet for Table on Windows 10
             get_and_apply_styles(
                 script_file=__file__,
-                file="wifi_table_win10.qss",
-                set_content=self.table.setStyleSheet,
-            )
-
-            get_and_apply_styles(
-                script_file=__file__,
-                file="win10.qss",
-                set_content=self.setStyleSheet,
+                set_content_funcs={
+                    "wifi_table_win10.qss": self.table.setStyleSheet,
+                    "win10.qss": self.setStyleSheet,
+                },
             )
 
     def center_on_screen(self) -> None:
@@ -259,15 +230,17 @@ class MasterWindow(QWidget):
             if process.returncode == 0:
                 get_and_apply_styles(
                     script_file=__file__,
-                    file="output_box_success.qss",
-                    set_content=self.output_box.setStyleSheet,
+                    set_content_funcs={
+                        "output_box_success.qss": self.output_box.setStyleSheet
+                    },
                 )
                 self.output_box.setPlainText("✅ Successfully disconnected from Wi-Fi.")
             else:
                 get_and_apply_styles(
                     script_file=__file__,
-                    file="output_box_failure.qss",
-                    set_content=self.output_box.setStyleSheet,
+                    set_content_funcs={
+                        "output_box_failure.qss": self.output_box.setStyleSheet
+                    },
                 )
                 self.output_box.setPlainText(
                     "❌ Failed to disconnect from Wi-Fi. Try running as administrator."

@@ -7,6 +7,7 @@ from helpers.path_utils import (
 )
 from helpers.wifi_disconnect import disconnect_wifi
 from helpers.wifi_networks import get_signal_icon, get_wifi_networks, load_wifi_networks
+from helpers.win_style_helper import apply_window_style
 
 __all__: list[str] = [
     "Blur",
@@ -18,4 +19,5 @@ __all__: list[str] = [
     "_load_stylesheet",
     "disconnect_wifi",
     "center_on_screen",
+    "apply_window_style",
 ]

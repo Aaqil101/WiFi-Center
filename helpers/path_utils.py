@@ -1,5 +1,7 @@
 import os
+from collections import defaultdict
 from pathlib import Path
+from typing import Callable, Dict
 
 
 def get_downloads_directory() -> str:
@@ -42,23 +44,65 @@ def get_downloads_directory() -> str:
     raise FileNotFoundError("Could not locate Downloads directory using any method")
 
 
-def get_and_apply_styles(*, script_file: str, file: str, set_content: callable) -> None:
+_stylesheet_cache: dict = {}  # Global dictionary to store stylesheets
+
+
+def get_and_apply_styles(
+    *, script_file: str, set_content_funcs: Dict[str, Callable], clear: bool = False
+) -> None:
     """
-    Given a script file path, a style file name, and a setter function for the style content,
-    applies the style to the given setter function.
+    Applies stylesheets to the respective widgets using the provided functions.
+
+    Loads stylesheets from the "styles" directory relative to the provided script file
+    and applies them to the widgets using the provided functions.
 
     Args:
-        script_file: The path to the script file that is applying the style.
-        file: The name of the style file to apply.
-        set_content: A callable that takes the style content as a string and applies it.
+        script_file (str): The path to the script file
+        set_content_funcs (Dict[str, Callable]): A dictionary of functions to apply the stylesheets
+            where the key is the name of the stylesheet and the value is the function to apply it
+        clear (bool, optional): If True, clears the cache before applying styles, Defaults to False.
+
+    Example:
+    >>> get_and_apply_styles(
+            script_file=__file__,
+            set_content_funcs={
+                "style1.css": self.widget1.setStyleSheet,
+                "style2.css": self.widget2.setStyleSheet,
+            }
+        )
 
     Returns:
-        The path to the style file that was applied.
+        None
     """
-    style_path: Path = Path(script_file).parent / "styles" / file
+    # Dictionary to store merged styles for each function
+    combined_styles = defaultdict(str)
 
-    with open(str(style_path), "r") as file:
-        set_content(file.read())
+    if clear:
+        _stylesheet_cache.clear()  # Clear the cache
+
+    for file, set_content in set_content_funcs.items():
+        styles_path: Path = Path(script_file).parent / "styles" / file
+
+        # Load from cache if available
+        if styles_path not in _stylesheet_cache:
+            _stylesheet_cache[styles_path] = _load_stylesheet(styles_path)
+
+        # Append styles to respective function
+        combined_styles[file] += _stylesheet_cache[styles_path] + "\n"
+
+    # Apply styles to the appropriate widgets
+    for file, styles in combined_styles.items():
+        set_content_funcs[file](styles)
+
+
+def _load_stylesheet(file_path: Path) -> str:
+    """Helper function to load a stylesheet from disk."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"⚠ Warning: Stylesheet {file_path.name} not found.")
+        return ""  # Return empty string to prevent errors
 
 
 if __name__ == "__main__":

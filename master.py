@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Helpers Modules
-from helpers import disconnect_wifi, get_and_apply_styles, load_wifi_networks
+from helpers import get_and_apply_styles, load_wifi_networks
 
 
 class MasterWindow(QWidget):
@@ -35,6 +35,8 @@ class MasterWindow(QWidget):
         load_wifi_networks(self.table)
 
     def initUI(self) -> None:
+        from helpers import apply_window_style, center_on_screen
+
         # Hidden Text Box
         self.output_box = QTextEdit()
         self.output_box.setFixedHeight(40)
@@ -125,8 +127,8 @@ class MasterWindow(QWidget):
 
         self.setLayout(master_layout)
 
-        self.apply_window_style()
-        self.center_on_screen()
+        apply_window_style(self)
+        center_on_screen(self)
 
     def testing(self) -> None:
         import random
@@ -167,49 +169,12 @@ class MasterWindow(QWidget):
         # Enable the command bar after the hide animation is complete (1400ms total)
         QTimer.singleShot(1400, enable_command_bar)
 
-    def apply_window_style(self) -> None:
-        """
-        Applies the appropriate window style based on the Windows version.
-        """
-        from helpers import Blur
-
-        windows_build: int = sys.getwindowsversion().build
-        is_windows_11: bool = windows_build >= 22000
-
-        if is_windows_11:
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-            get_and_apply_styles(
-                script_file=__file__,
-                set_content_funcs={
-                    "win11.qss": self.setStyleSheet,
-                    "wifi_table_win11.qss": self.table.setStyleSheet,
-                },
-            )
-            Blur(self.winId())
-        else:
-            get_and_apply_styles(
-                script_file=__file__,
-                set_content_funcs={
-                    "win10.qss": self.setStyleSheet,
-                    "wifi_table_win10.qss": self.table.setStyleSheet,
-                },
-            )
-
-    def center_on_screen(self) -> None:
-        """
-        Centers the window on the screen.
-        """
-        screen_geometry: QRect = QApplication.primaryScreen().geometry()
-        x: int = (screen_geometry.width() - self.width()) // 2
-        y: int = (screen_geometry.height() - self.height()) // 2
-        self.move(x, y)
-
     def check_input(self) -> None:
         user_input: str = self.command_bar.text()
         self.command_bar.clear()
 
         if "d" in user_input.lower():
-            disconnect_wifi(self)
+            self.testing()
 
         if "q" in user_input.lower():
             QApplication.quit()
@@ -274,24 +239,24 @@ class MasterWindow(QWidget):
         self.command_bar_animation.setEndValue(command_bar_end_rect)
         self.command_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-        # # Slide-up animation for table
-        # self.table_animation = QPropertyAnimation(self.table, b"geometry")
-        # self.table_animation.setDuration(400)
-        # table_start_rect: QRect = self.table.geometry()
-        # table_end_rect = QRect(
-        #     table_start_rect.x(),
-        #     table_start_rect.y() - 50,  # Lift up by 50px
-        #     table_start_rect.width(),
-        #     table_start_rect.height(),
-        # )
-        # self.table_animation.setStartValue(table_start_rect)
-        # self.table_animation.setEndValue(table_end_rect)
-        # self.table_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        # Slide-up animation for table
+        self.table_animation = QPropertyAnimation(self.table, b"geometry")
+        self.table_animation.setDuration(400)
+        table_start_rect: QRect = self.table.geometry()
+        table_end_rect = QRect(
+            table_start_rect.x(),
+            table_start_rect.y() - 50,  # Lift up by 50px
+            table_start_rect.width(),
+            table_start_rect.height(),
+        )
+        self.table_animation.setStartValue(table_start_rect)
+        self.table_animation.setEndValue(table_end_rect)
+        self.table_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
         # Start animations
         self.fade_in_animation.start()
         self.slide_in_animation.start()
-        # self.table_animation.start()
+        self.table_animation.start()
         self.command_bar_animation.start()
 
     def hide_output_box_with_animation(self) -> None:
@@ -344,19 +309,19 @@ class MasterWindow(QWidget):
         self.command_bar_animation.setEndValue(command_bar_end_rect)
         self.command_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-        # # Slide-down animation for table
-        # self.table_animation = QPropertyAnimation(self.table, b"geometry")
-        # self.table_animation.setDuration(400)
-        # table_start_rect: QRect = self.table.geometry()
-        # table_end_rect = QRect(
-        #     table_start_rect.x(),
-        #     table_start_rect.y() + 50,  # Move down by 50px
-        #     table_start_rect.width(),
-        #     table_start_rect.height(),
-        # )
-        # self.table_animation.setStartValue(table_start_rect)
-        # self.table_animation.setEndValue(table_end_rect)
-        # self.table_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        # Slide-down animation for table
+        self.table_animation = QPropertyAnimation(self.table, b"geometry")
+        self.table_animation.setDuration(400)
+        table_start_rect: QRect = self.table.geometry()
+        table_end_rect = QRect(
+            table_start_rect.x(),
+            table_start_rect.y() + 50,  # Move down by 50px
+            table_start_rect.width(),
+            table_start_rect.height(),
+        )
+        self.table_animation.setStartValue(table_start_rect)
+        self.table_animation.setEndValue(table_end_rect)
+        self.table_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
         # Connect the end of the fade-out animation to hide the output box
         self.fade_out_animation.finished.connect(self.output_box.hide)
@@ -364,11 +329,11 @@ class MasterWindow(QWidget):
         # Start animations
         self.fade_out_animation.start()
         self.slide_out_animation.start()
-        # self.table_animation.start()
+        self.table_animation.start()
         self.command_bar_animation.start()
 
 
-def master():
+def master() -> None:
     from PyQt6.QtCore import QElapsedTimer
 
     timer = QElapsedTimer()

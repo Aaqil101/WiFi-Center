@@ -7,110 +7,112 @@ import qtawesome as qta
 
 # PyQt6 Modules
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QWidget
 
 
 def load_wifi_networks(table: QTableWidget) -> None:
     """
-    Populates a QTableWidget with the 6 strongest Wi-Fi networks in range, each with its signal strength as a percentage.
+    Loads the list of available Wi-Fi networks into the given QTableWidget.
 
-    :param table: The QTableWidget to populate
+    :param table: The QTableWidget to load the networks into
     :type table: QTableWidget
     """
     networks: list = get_wifi_networks()
     table.setRowCount(len(networks))
 
-    for row, (ssid, strength) in enumerate(networks):
-        table.setItem(row, 0, QTableWidgetItem(ssid))  # Set SSID
-
-        # Create QWidget for aligned icon + percentage
-        widget: QWidget = get_signal_icon(strength)
-
-        # Insert QWidget in table
-        table.setCellWidget(row, 1, widget)
+    for row, (ssid, strength, requires_login) in enumerate(networks):
+        table.setCellWidget(row, 0, get_network_name_widget(ssid, requires_login))
+        table.setCellWidget(row, 1, get_signal_icon(strength))
 
 
-def get_wifi_networks() -> list:
+def get_network_name_widget(ssid: str, requires_login: bool) -> QWidget:
     """
-    Gets a list of the 6 strongest Wi-Fi networks in range. Returns a list of tuples, each containing the SSID and signal strength as a percentage.
+    Generates a QWidget containing a QLabel with the given ssid and a
+    QIcon of a lock if the network requires login.
 
-    :return: A list of tuples containing the SSID and signal strength as a percentage.
-    :rtype: list[tuple[str, int]]
+    :param ssid: The name of the network to be displayed
+    :type ssid: str
+    :param requires_login: Whether the network requires login or not
+    :type requires_login: bool
+    :return: A QWidget containing the network name and lock icon if needed
+    :rtype: QWidget
     """
-    try:
-        process: subprocess.CompletedProcess[str] = subprocess.run(
-            ["netsh", "wlan", "show", "networks", "mode=bssid"],
-            capture_output=True,
-            text=True,
-            shell=True,
-        )
-        output: str = process.stdout
-        networks: list = []
+    container = QWidget()
+    layout = QHBoxLayout()
 
-        ssid, signal = None, None
-        for line in output.split("\n"):
-            ssid_match: re.Match[str] | None = re.search(r"SSID \d+ : (.+)", line)
-            signal_match: re.Match[str] | None = re.search(r"Signal\s*:\s*(\d+)%", line)
+    # Create the SSID label
+    ssid_label = QLabel(ssid)
+    ssid_label.setStyleSheet(
+        """
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: Cambria, Georgia, serif;
+        """
+    )
 
-            if ssid_match:
-                ssid: str | re.Any = ssid_match.group(1)
-            if signal_match:
-                signal = int(signal_match.group(1))
+    layout.addWidget(ssid_label)
 
-            if ssid and signal is not None:
-                networks.append((ssid, signal))
-                ssid, signal = None, None  # Reset for next network
+    # Add lock icon if the network requires login
+    if requires_login:
+        lock_icon = qta.icon("mdi.lock", color="#ffffff")  # Lock icon
+        lock_label = QLabel()
+        lock_label.setPixmap(lock_icon.pixmap(12, 12))
+        layout.addWidget(lock_label)
 
-        return networks[:6]
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+    container.setStyleSheet("background-color: transparent;")
+    container.setLayout(layout)
 
-    except Exception as e:
-        print(f"Error retrieving Wi-Fi networks: {e}")
-        return []
+    return container
 
 
 def get_signal_icon(strength: int) -> QWidget:
     """
-    Returns a QWidget containing an icon and a percentage label indicating the strength of the given Wi-Fi network.
+    Returns a QWidget containing a signal strength icon and its corresponding percentage value as a string.
 
-    The icon is determined by the strength of the network, and is one of the following:
-        - Full Signal (>= 75%): mdi6.wifi-strength-4
-        - Strong Signal (>= 50%): mdi6.wifi-strength-3
-        - Medium Signal (>= 25%): mdi6.wifi-strength-2
-        - Weak Signal (>= 0%): mdi6.wifi-strength-1
-        - No Signal (< 0%): mdi6.wifi-strength-off
+    The strength parameter is the signal strength as an integer from 0 to 100.
 
-    The percentage label is aligned with the icon and is displayed in white, with a bold font and a family of Cambria, Cochin, Georgia, Times, or Times New Roman.
+    The returned QWidget is a container with a horizontal layout containing a QLabel for the icon and another QLabel for the percentage string.
 
-    :param strength: The strength of the Wi-Fi network as a percentage (0-100)
-    :return: A QWidget containing the icon and percentage label
+    The icon is chosen based on the signal strength, with the following thresholds:
+
+        - 75% and above: mdi6.wifi-strength-4 (four bars, green)
+        - 50% to 74%: mdi6.wifi-strength-3 (three bars, yellow-orange)
+        - 25% to 49%: mdi6.wifi-strength-2 (two bars, orange)
+        - 1% to 24%: mdi6.wifi-strength-1 (one bar, red)
+        - 0%: mdi6.wifi-strength-off (no bars, gray)
+
+    The color of the icon is also chosen based on the threshold, with the same colors as above.
+
+    The percentage string is displayed in white, 14px, bold, Cambria font.
+
+    The container is transparent and has a centered horizontal layout with no margins.
     """
-    if strength >= 75:
-        # Full Signal
-        icon = qta.icon("mdi6.wifi-strength-4", color="#00ff00")
-    elif strength >= 50:
-        # Strong Signal
-        icon = qta.icon("mdi6.wifi-strength-3", color="#ffaa00")
-    elif strength >= 25:
-        # Medium Signal
-        icon = qta.icon("mdi6.wifi-strength-2", color="#ff6600")
-    elif strength > 0:
-        # Weak Signal
-        icon = qta.icon("mdi6.wifi-strength-1", color="#ff0000")
-    else:
-        # No Signal
-        icon = qta.icon("mdi6.wifi-strength-off", color="#777777")
+    strength_levels: list[tuple[int, str, str]] = [
+        (75, "mdi6.wifi-strength-4", "#00ff00"),
+        (50, "mdi6.wifi-strength-3", "#ffaa00"),
+        (25, "mdi6.wifi-strength-2", "#ff6600"),
+        (1, "mdi6.wifi-strength-1", "#ff0000"),
+        (0, "mdi6.wifi-strength-off", "#777777"),
+    ]
+
+    for threshold, icon_name, color in strength_levels:
+        if strength >= threshold:
+            wifi_icon = qta.icon(icon_name, color=color)
+            break
 
     icon_label = QLabel()
-    pixmap = icon.pixmap(16, 16)  # Adjust size if needed
-    icon_label.setPixmap(pixmap)
+    icon_label.setPixmap(wifi_icon.pixmap(16, 16))
 
     text_label = QLabel(f"{strength}%")
     text_label.setStyleSheet(
         """
-        color: rgb(255, 255, 255);
+        color: #ffffff;
         font-size: 14px;
         font-weight: 700;
-        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        font-family: Cambria, Georgia, serif;
         """
     )
 
@@ -120,11 +122,79 @@ def get_signal_icon(strength: int) -> QWidget:
     layout.addWidget(text_label)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    container.setStyleSheet(
-        """
-        background-color: transparent;
-        """
-    )
+    container.setStyleSheet("background-color: transparent;")
     container.setLayout(layout)
 
     return container
+
+
+def get_wifi_networks() -> list:
+    """
+    Retrieves a list of available Wi-Fi networks and their respective signal strengths.
+
+    The list is sorted by signal strength in descending order (strongest first).
+
+    The function returns a list of tuples, where each tuple contains the SSID of the network,
+    the signal strength (as a percentage), and a boolean indicating whether a login is required.
+
+    If an error occurs while retrieving the networks, an empty list is returned.
+
+    :return: A list of tuples containing the available Wi-Fi networks and their properties
+    :rtype: list[tuple[str, int, bool]]
+    """
+    try:
+        # Get saved Wi-Fi profiles
+        saved_profiles_process: subprocess.CompletedProcess[str] = subprocess.run(
+            ["netsh", "wlan", "show", "profiles"],
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        saved_profiles_output: str = saved_profiles_process.stdout
+        saved_profiles = set(
+            re.findall(r"All User Profile\s*:\s*(.+)", saved_profiles_output)
+        )
+
+        # Get available Wi-Fi networks
+        process: subprocess.CompletedProcess[str] = subprocess.run(
+            ["netsh", "wlan", "show", "networks", "mode=bssid"],
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        output: str = process.stdout
+
+        ssid_pattern: re.Pattern[str] = re.compile(r"SSID \d+ : (.+)")
+        signal_pattern: re.Pattern[str] = re.compile(r"Signal\s*:\s*(\d+)%")
+        security_pattern: re.Pattern[str] = re.compile(r"Authentication\s*:\s*(?!Open)")
+
+        networks = []
+        ssid = None
+        requires_login = False  # True if network is secured and not saved
+
+        for line in output.splitlines():
+            ssid_match: re.Match[str] | None = ssid_pattern.search(line)
+            if ssid_match:
+                ssid: str | re.Any = ssid_match.group(1)
+                requires_login = False  # Reset for each SSID
+                continue
+
+            if security_pattern.search(line):  # If the network is secured
+                requires_login = True  # Assume login is needed
+
+            signal_match: re.Match[str] | None = signal_pattern.search(line)
+            if ssid and signal_match:
+                signal = int(signal_match.group(1))
+
+                # Check if SSID is in saved profiles
+                if ssid in saved_profiles:
+                    requires_login = False  # No lock icon needed
+
+                networks.append((ssid, signal, requires_login))
+                ssid = None  # Reset for next network
+
+        return networks[:6]
+
+    except Exception as e:
+        print(f"Error retrieving Wi-Fi networks: {e}")
+        return []

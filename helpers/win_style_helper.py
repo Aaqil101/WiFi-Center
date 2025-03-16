@@ -1,5 +1,6 @@
 # Built-in Modules
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 # PyQt6 Modules
@@ -8,9 +9,17 @@ from PyQt6.QtCore import Qt
 # Helpers Modules
 from helpers import Blur, get_and_apply_styles
 
-# Module-level caching
-WINDOWS_BUILD: int = sys.getwindowsversion().build
-IS_WINDOWS_11: bool = WINDOWS_BUILD >= 22000
+
+@lru_cache(maxsize=1)
+def is_windows_11() -> bool:
+    """
+    Check if the system is running Windows 11.
+
+    Returns:
+        bool: True if Windows 11 (build >= 22000), False otherwise
+    """
+    windows_build: int = sys.getwindowsversion().build
+    return windows_build >= 22000
 
 
 def apply_window_style(self) -> None:
@@ -30,7 +39,7 @@ def apply_window_style(self) -> None:
     On Windows 10 or earlier:
         - Applies styles from 'win10.qss' and 'wifi_table_win10.qss'.
     """
-    if IS_WINDOWS_11:
+    if is_windows_11():
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         get_and_apply_styles(
             script_file=Path(__file__).parent,
@@ -39,7 +48,7 @@ def apply_window_style(self) -> None:
                 "wifi_table_win11.qss": self.table.setStyleSheet,
             },
         )
-        Blur(self.winId())
+        Blur(self.winId(), DarkMode=True)
     else:
         get_and_apply_styles(
             script_file=Path(__file__).parent,

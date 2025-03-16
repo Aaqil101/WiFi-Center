@@ -6,13 +6,16 @@ from pathlib import Path
 from PyQt6.QtCore import QTimer
 
 # Helpers Modules
-from helpers import get_and_apply_styles
+from helpers import (
+    get_and_apply_styles,
+    hide_output_box_with_animation,
+    processing,
+    show_output_box_with_animation,
+)
 
 
-def disconnect_wifi(self) -> None:
-    # Disable the command bar at the beginning of the function
-    self.command_bar.setDisabled(True)
-
+def disconnect(self) -> None:
+    processing(self, begin=True)
     try:
         process: subprocess.CompletedProcess[str] = subprocess.run(
             ["netsh", "wlan", "disconnect"],
@@ -43,14 +46,10 @@ def disconnect_wifi(self) -> None:
         print(f"⚠ Error: {e}")
 
     # Show the output box with animation
-    self.show_output_box_with_animation()
+    show_output_box_with_animation(self)
 
-    def enable_command_bar() -> None:
-        self.command_bar.setDisabled(False)
-        self.command_bar.setFocus()
+    # Hide the output box after 0.5 seconds and then enable the command bar
+    QTimer.singleShot(500, lambda: hide_output_box_with_animation(self))
 
-    # Hide the output box after 2 seconds and then enable the command bar
-    QTimer.singleShot(1000, self.hide_output_box_with_animation)
-
-    # Enable the command bar after the hide animation is complete (1400ms total)
-    QTimer.singleShot(1400, enable_command_bar)
+    # Enable the command bar after the hide animation is complete (1200ms total)
+    QTimer.singleShot(1200, lambda: processing(self, end=True))

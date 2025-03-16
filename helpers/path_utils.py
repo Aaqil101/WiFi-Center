@@ -1,9 +1,11 @@
 import os
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict
 
 
+@lru_cache(maxsize=1)
 def get_downloads_directory() -> str:
     """
     Determine the path to the current user's Downloads directory.
@@ -44,9 +46,6 @@ def get_downloads_directory() -> str:
     raise FileNotFoundError("Could not locate Downloads directory using any method")
 
 
-_stylesheet_cache: dict = {}  # Global dictionary to store stylesheets
-
-
 def get_and_apply_styles(
     *, script_file: str, set_content_funcs: Dict[str, Callable], clear: bool = False
 ) -> None:
@@ -78,25 +77,34 @@ def get_and_apply_styles(
     combined_styles = defaultdict(str)
 
     if clear:
-        _stylesheet_cache.clear()  # Clear the cache
+        # Clear the lru_cache for the stylesheet loader
+        _load_stylesheet.cache_clear()
 
     for file, set_content in set_content_funcs.items():
         styles_path: Path = Path(script_file).parent / "styles" / file
 
-        # Load from cache if available
-        if styles_path not in _stylesheet_cache:
-            _stylesheet_cache[styles_path] = _load_stylesheet(styles_path)
+        # Load stylesheet (cached if already loaded before)
+        stylesheet: str = _load_stylesheet(styles_path)
 
         # Append styles to respective function
-        combined_styles[file] += _stylesheet_cache[styles_path] + "\n"
+        combined_styles[file] += stylesheet + "\n"
 
     # Apply styles to the appropriate widgets
     for file, styles in combined_styles.items():
         set_content_funcs[file](styles)
 
 
+@lru_cache(maxsize=None)
 def _load_stylesheet(file_path: Path) -> str:
-    """Helper function to load a stylesheet from disk."""
+    """
+    Helper function to load a stylesheet from disk.
+
+    Args:
+        file_path (Path): Path to the stylesheet file
+
+    Returns:
+        str: Content of the stylesheet or empty string if file not found
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()

@@ -17,7 +17,6 @@ QTableWidget::item {
 }
 
 QHeaderView::section {
-    background-color: rgba(42, 48, 59, 0.7);
     color: rgba(255, 255, 255, 0.9);
     padding: 6px;
     font-size: 14px;

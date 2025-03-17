@@ -140,6 +140,7 @@ class MasterWindow(QWidget):
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def testing(self) -> None:
+        """Just for testing purposes"""
         import random
 
         from helpers import (
@@ -180,6 +181,9 @@ class MasterWindow(QWidget):
         QTimer.singleShot(1200, lambda: processing(self, end=True))
 
     def check_input(self) -> None:
+        # Power Control Functions
+        from helpers import hibernate, lock, reboot, shutdown, sleep
+
         user_input: str = self.command_bar.text()
         self.command_bar.clear()
 
@@ -188,6 +192,21 @@ class MasterWindow(QWidget):
 
         if "r" in user_input.lower():
             load_wifi_networks(self.table, force_refresh=True)
+
+        if "_shutdown" in user_input.lower():
+            shutdown()
+
+        if "_reboot" in user_input.lower():
+            reboot()
+
+        if "_hibernate" in user_input.lower():
+            hibernate()
+
+        if "_sleep" in user_input.lower():
+            sleep()
+
+        if "_lock" in user_input.lower():
+            lock()
 
         if "q" in user_input.lower():
             QApplication.quit()

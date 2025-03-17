@@ -16,8 +16,18 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+# Core Modules
+from core import CommandProcessor, load_wifi_networks
+
 # Helpers Modules
-from helpers import get_and_apply_styles, load_wifi_networks
+from helpers import (
+    apply_window_style,
+    center_on_screen,
+    get_and_apply_styles,
+    hide_output_box_with_animation,
+    processing,
+    show_output_box_with_animation,
+)
 
 
 class MasterWindow(QWidget):
@@ -30,11 +40,12 @@ class MasterWindow(QWidget):
 
         self.setWindowIcon(QIcon(str(icon_path)))
 
+        # Initialize the command processor
+        self.command_processor = CommandProcessor(self)
+
         self.initUI()
 
     def initUI(self) -> None:
-        from helpers import apply_window_style, center_on_screen
-
         # Hidden Text Box
         self.output_box = QTextEdit()
         self.output_box.setFixedHeight(40)
@@ -61,7 +72,6 @@ class MasterWindow(QWidget):
         self.command_bar.setFixedWidth(580)
         self.command_bar.setFixedHeight(40)
         self.command_bar.setPlaceholderText("Type here...")
-
         self.command_bar.returnPressed.connect(self.check_input)
 
         # Layouts - Adjust to center align all elements
@@ -143,12 +153,6 @@ class MasterWindow(QWidget):
         """Just for testing purposes"""
         import random
 
-        from helpers import (
-            hide_output_box_with_animation,
-            processing,
-            show_output_box_with_animation,
-        )
-
         processing(self, begin=True)
 
         number: int = random.randint(0, 1)
@@ -174,42 +178,23 @@ class MasterWindow(QWidget):
         # Show the output box with animation
         show_output_box_with_animation(self)
 
-        # Hide the output box after 0.5 seconds and then enable the command bar
-        QTimer.singleShot(500, lambda: hide_output_box_with_animation(self))
+        # Hide the output box after 1 seconds and then enable the command bar
+        QTimer.singleShot(1000, lambda: hide_output_box_with_animation(self))
 
         # Enable the command bar after the hide animation is complete (1200ms total)
         QTimer.singleShot(1200, lambda: processing(self, end=True))
 
     def check_input(self) -> None:
-        # Power Control Functions
-        from helpers import hibernate, lock, reboot, shutdown, sleep
+        """
+        Handles user input from the command bar.
 
-        user_input: str = self.command_bar.text()
+        This method retrieves text input from the command bar, processes it
+        by removing leading and trailing whitespace, clears the command bar,
+        and passes the cleaned input to the command processor for execution.
+        """
+        user_input: str = self.command_bar.text().strip()
         self.command_bar.clear()
-
-        if "d" in user_input.lower():
-            self.testing()
-
-        if "r" in user_input.lower():
-            load_wifi_networks(self.table, force_refresh=True)
-
-        if "_shutdown" in user_input.lower():
-            shutdown()
-
-        if "_reboot" in user_input.lower():
-            reboot()
-
-        if "_hibernate" in user_input.lower():
-            hibernate()
-
-        if "_sleep" in user_input.lower():
-            sleep()
-
-        if "_lock" in user_input.lower():
-            lock()
-
-        if "q" in user_input.lower():
-            QApplication.quit()
+        self.command_processor.process_input(user_input)
 
 
 def master() -> None:

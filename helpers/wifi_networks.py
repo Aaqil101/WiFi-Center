@@ -1,16 +1,71 @@
 # Built-in Modules
-import re
-import subprocess
 import time
 from functools import lru_cache
-from typing import Any
+from typing import Dict, List, Optional, Set, Tuple
 
-# External Modules
+# QtAwesome Modules
 import qtawesome as qta
 
 # PyQt6 Modules
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QWidget
+
+# PyWiFi Modules
+from pywifi import PyWiFi, const, iface
+
+
+class WifiCache:
+    """A class to handle WiFi network caching with timeout functionality."""
+
+    def __init__(self, timeout_seconds: int = 10) -> None:
+        """Initialize the cache with a specified timeout period."""
+        self.data: Optional[List] = None
+        self.timestamp: float = 0
+        self.timeout: int = timeout_seconds
+
+    def is_valid(self) -> bool:
+        """Check if the cache contains valid, non-expired data."""
+        return self.data is not None and time.time() - self.timestamp < self.timeout
+
+    def update(self, data: List) -> None:
+        """Update the cache with new data and reset the timestamp."""
+        self.data = data
+        self.timestamp = time.time()
+
+    def clear(self) -> None:
+        """Clear the cache data."""
+        self.data = None
+        self.timestamp = 0
+
+
+# Global WiFi cache instance
+_wifi_cache = WifiCache(timeout_seconds=10)
+# Global PyWiFi interface (initialized once)
+_wifi_interface = None
+
+
+def get_wifi_interface() -> Optional[iface.Interface]:
+    """
+    Get the WiFi interface singleton.
+
+    Returns:
+        The first available WiFi interface or None if not available
+    """
+    global _wifi_interface
+
+    if _wifi_interface is not None:
+        return _wifi_interface
+
+    try:
+        wifi = PyWiFi()
+        if wifi.interfaces():
+            _wifi_interface = wifi.interfaces()[0]
+            return _wifi_interface
+    except Exception as e:
+        print(f"Error initializing WiFi interface: {e}")
+
+    return None
 
 
 def load_wifi_networks(table: QTableWidget, *, force_refresh: bool = False) -> None:
@@ -21,20 +76,20 @@ def load_wifi_networks(table: QTableWidget, *, force_refresh: bool = False) -> N
         table: The QTableWidget to load the networks into
         force_refresh: If True, forces a refresh of the network data
     """
-    networks: list = get_wifi_networks(force_refresh=force_refresh)
+    networks: List[Tuple[str | int | bool]] = get_wifi_networks(
+        force_refresh=force_refresh
+    )
+
+    # Optimize table updates by setting row count once
     table.setRowCount(len(networks))
 
+    # Update table widgets
     for row, (ssid, strength, requires_login) in enumerate(networks):
         table.setCellWidget(row, 0, get_network_name_widget(ssid, requires_login))
         table.setCellWidget(row, 1, get_signal_icon(strength))
 
 
-# Cache for WiFi networks with manual expiration tracking
-_wifi_cache: dict[str, Any] = {"data": None, "timestamp": 0}
-_CACHE_TIMEOUT = 10  # seconds
-
-
-def get_wifi_networks(force_refresh: bool = False) -> list:
+def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]]:
     """
     Retrieves a list of available Wi-Fi networks and their respective signal strengths.
 
@@ -48,72 +103,58 @@ def get_wifi_networks(force_refresh: bool = False) -> list:
         A list of tuples containing the available Wi-Fi networks and their properties
         Each tuple contains (ssid, signal_strength, requires_login)
     """
-    current_time: float = time.time()
-
-    # Return cached data if it's fresh and no force refresh
-    if not force_refresh and _wifi_cache["data"] is not None:
-        if current_time - _wifi_cache["timestamp"] < _CACHE_TIMEOUT:
-            return _wifi_cache["data"]
+    # Use cached data if available and not forced to refresh
+    if not force_refresh and _wifi_cache.is_valid():
+        return _wifi_cache.data
 
     try:
-        # Get saved Wi-Fi profiles
-        saved_profiles_process: subprocess.CompletedProcess[str] = subprocess.run(
-            ["netsh", "wlan", "show", "profiles"],
-            capture_output=True,
-            text=True,
-            shell=True,
-        )
-        saved_profiles_output: str = saved_profiles_process.stdout
-        saved_profiles = set(
-            re.findall(r"All User Profile\s*:\s*(.+)", saved_profiles_output)
-        )
+        Iface: iface.Interface | None = get_wifi_interface()
+        if not Iface:
+            return []
 
-        # Get available Wi-Fi networks
-        process: subprocess.CompletedProcess[str] = subprocess.run(
-            ["netsh", "wlan", "show", "networks", "mode=bssid"],
-            capture_output=True,
-            text=True,
-            shell=True,
-        )
-        output: str = process.stdout
+        # Get saved profiles (connections) once
+        saved_profiles: Set[str] = {
+            profile.ssid for profile in Iface.network_profiles()
+        }
 
-        ssid_pattern: re.Pattern[str] = re.compile(r"SSID \d+ : (.+)")
-        signal_pattern: re.Pattern[str] = re.compile(r"Signal\s*:\s*(\d+)%")
-        security_pattern: re.Pattern[str] = re.compile(r"Authentication\s*:\s*(?!Open)")
+        # Trigger scan
+        Iface.scan()
 
-        networks: list = []
-        ssid = None
-        requires_login = False  # True if network is secured and not saved
+        # Wait just enough time for the scan to complete
+        time.sleep(0.8)  # Reduced from 1.0 second for performance
 
-        for line in output.splitlines():
-            ssid_match: re.Match[str] | None = ssid_pattern.search(line)
-            if ssid_match:
-                ssid: str | re.Any = ssid_match.group(1)
-                requires_login = False  # Reset for each SSID
+        # Get scan results
+        scan_results: list = Iface.scan_results()
+
+        # Process scan results more efficiently
+        networks_dict: Dict[str, Tuple[str, int, bool]] = {}
+
+        for result in scan_results:
+            ssid: str = result.ssid
+            if not ssid:  # Skip networks with empty SSIDs
                 continue
 
-            if security_pattern.search(line):  # If the network is secured
-                requires_login = True  # Assume login is needed
+            # Convert signal strength (dBm) to percentage (0-100%)
+            # Signal range is typically -30 dBm (excellent) to -90 dBm (poor)
+            signal_strength: int = min(max(0, (result.signal + 100) * 2), 100)
+            signal_percent = int(signal_strength)
 
-            signal_match: re.Match[str] | None = signal_pattern.search(line)
-            if ssid and signal_match:
-                signal = int(signal_match.group(1))
+            # Check if authentication is required (simplified check)
+            requires_login: bool = (
+                result.akm[0] != const.AKM_TYPE_NONE and ssid not in saved_profiles
+            )
 
-                # Check if SSID is in saved profiles
-                if ssid in saved_profiles:
-                    requires_login = False  # No lock icon needed
+            # Keep only the strongest signal for each SSID
+            if ssid not in networks_dict or signal_percent > networks_dict[ssid][1]:
+                networks_dict[ssid] = (ssid, signal_percent, requires_login)
 
-                networks.append((ssid, signal, requires_login))
-                ssid = None  # Reset for next network
+        # Convert to list and sort only once
+        result: List[Tuple[str | int | bool]] = sorted(
+            networks_dict.values(), key=lambda x: x[1], reverse=True
+        )[:6]
 
-        # Sort networks by signal strength in descending order
-        networks.sort(key=lambda x: x[1], reverse=True)
-
-        result: list = networks[:6]
-
-        # Cache the result with timestamp
-        _wifi_cache["data"] = result
-        _wifi_cache["timestamp"] = current_time
+        # Update cache with the result
+        _wifi_cache.update(result)
 
         return result
 
@@ -122,21 +163,21 @@ def get_wifi_networks(force_refresh: bool = False) -> list:
         return []
 
 
-# Cache widget style sheets to avoid repeated string creation
+# Styling constants to avoid string repetition
+_LABEL_STYLE = """
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: Cambria, Georgia, serif;
+"""
+
+_CONTAINER_STYLE = "background-color: transparent;"
+
+
 @lru_cache(maxsize=1)
 def get_label_style() -> str:
-    """
-    Returns the style sheet for labels.
-
-    Returns:
-        str: The style sheet
-    """
-    return """
-        color: #ffffff;
-        font-size: 14px;
-        font-weight: 700;
-        font-family: Cambria, Georgia, serif;
-    """
+    """Returns the cached style sheet for labels."""
+    return _LABEL_STYLE
 
 
 def get_network_name_widget(ssid: str, requires_login: bool) -> QWidget:
@@ -153,41 +194,45 @@ def get_network_name_widget(ssid: str, requires_login: bool) -> QWidget:
     """
     container = QWidget()
     layout = QHBoxLayout()
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
     # Create the SSID label
     ssid_label = QLabel(ssid)
-    ssid_label.setStyleSheet(get_label_style())
-
+    ssid_label.setStyleSheet(_LABEL_STYLE)  # Direct use of constant
     layout.addWidget(ssid_label)
 
     # Add lock icon if the network requires login
     if requires_login:
-        lock_icon = get_lock_icon()
+        lock_icon: QIcon = get_lock_icon()
         lock_label = QLabel()
-        lock_label.setPixmap(lock_icon.pixmap(12, 12))
+        lock_label.setPixmap(lock_icon.pixmap(QSize(12, 12)))
         layout.addWidget(lock_label)
 
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-    container.setStyleSheet("background-color: transparent;")
+    container.setStyleSheet(_CONTAINER_STYLE)  # Direct use of constant
     container.setLayout(layout)
 
     return container
 
 
 @lru_cache(maxsize=1)
-def get_lock_icon():
-    """
-    Returns a cached lock icon.
-
-    Returns:
-        QIcon: The lock icon
-    """
+def get_lock_icon() -> QIcon:
+    """Returns a cached lock icon."""
     return qta.icon("mdi.lock", color="#ffffff")
 
 
-@lru_cache(maxsize=5)  # Only 5 different strength levels
-def _get_signal_icon_data(strength: int) -> tuple:
+# Signal strength constants
+_SIGNAL_LEVELS: List[Tuple[int | str]] = [
+    (75, "mdi6.wifi-strength-4", "#00ff00"),  # Strong signal (green)
+    (50, "mdi6.wifi-strength-3", "#ffaa00"),  # Good signal (yellow-orange)
+    (25, "mdi6.wifi-strength-2", "#ff6600"),  # Fair signal (orange)
+    (1, "mdi6.wifi-strength-1", "#ff0000"),  # Poor signal (red)
+    (0, "mdi6.wifi-strength-off", "#777777"),  # No signal (gray)
+]
+
+
+@lru_cache(maxsize=101)  # Cache for all possible strength values (0-100)
+def _get_signal_icon_data(strength: int) -> Tuple[str, str]:
     """
     Returns the icon name and color for a given signal strength.
 
@@ -197,15 +242,7 @@ def _get_signal_icon_data(strength: int) -> tuple:
     Returns:
         tuple: A tuple containing the icon name and color
     """
-    strength_levels: list[tuple[int, str, str]] = [
-        (75, "mdi6.wifi-strength-4", "#00ff00"),
-        (50, "mdi6.wifi-strength-3", "#ffaa00"),
-        (25, "mdi6.wifi-strength-2", "#ff6600"),
-        (1, "mdi6.wifi-strength-1", "#ff0000"),
-        (0, "mdi6.wifi-strength-off", "#777777"),
-    ]
-
-    for threshold, icon_name, color in strength_levels:
+    for threshold, icon_name, color in _SIGNAL_LEVELS:
         if strength >= threshold:
             return (icon_name, color)
 
@@ -213,66 +250,60 @@ def _get_signal_icon_data(strength: int) -> tuple:
     return ("mdi6.wifi-strength-off", "#777777")
 
 
+@lru_cache(maxsize=101)  # Cache icons for all possible strength values
+def get_cached_wifi_icon(strength: int) -> QIcon:
+    """Returns a cached WiFi icon for a given strength."""
+    icon_name, color = _get_signal_icon_data(strength)
+    return qta.icon(icon_name, color=color)
+
+
 def get_signal_icon(strength: int) -> QWidget:
     """
-    Returns a QWidget containing a signal strength icon and its corresponding percentage value as a string.
+    Returns a QWidget containing a signal strength icon and its corresponding percentage value.
 
-    The strength parameter is the signal strength as an integer from 0 to 100.
+    Args:
+        strength: Signal strength (0-100)
 
-    The returned QWidget is a container with a horizontal layout containing a QLabel for the icon and another QLabel for the percentage string.
-
-    The icon is chosen based on the signal strength, with the following thresholds:
-
-        - 75% and above: mdi6.wifi-strength-4 (four bars, green)
-        - 50% to 74%: mdi6.wifi-strength-3 (three bars, yellow-orange)
-        - 25% to 49%: mdi6.wifi-strength-2 (two bars, orange)
-        - 1% to 24%: mdi6.wifi-strength-1 (one bar, red)
-        - 0%: mdi6.wifi-strength-off (no bars, gray)
-
-    The color of the icon is also chosen based on the threshold, with the same colors as above.
-
-    The percentage string is displayed in white, 14px, bold, Cambria font.
-
-    The container is transparent and has a centered horizontal layout with no margins.
+    Returns:
+        A QWidget containing the icon and percentage text
     """
-    # Get cached icon data
-    icon_name, color = _get_signal_icon_data(strength)
-    wifi_icon = qta.icon(icon_name, color=color)
-
-    icon_label = QLabel()
-    icon_label.setPixmap(wifi_icon.pixmap(16, 16))
-
-    text_label = QLabel(f"{strength}%")
-    text_label.setStyleSheet(get_label_style())
+    # Use pre-cached icon
+    wifi_icon: QIcon = get_cached_wifi_icon(strength)
 
     container = QWidget()
     layout = QHBoxLayout()
-    layout.addWidget(icon_label)
-    layout.addWidget(text_label)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    container.setStyleSheet("background-color: transparent;")
+
+    # Create and add icon label
+    icon_label = QLabel()
+    icon_label.setPixmap(wifi_icon.pixmap(QSize(16, 16)))
+    layout.addWidget(icon_label)
+
+    # Create and add text label
+    text_label = QLabel(f"{strength}%")
+    text_label.setStyleSheet(_LABEL_STYLE)  # Direct use of constant
+    layout.addWidget(text_label)
+
+    container.setStyleSheet(_CONTAINER_STYLE)  # Direct use of constant
     container.setLayout(layout)
 
     return container
 
 
-# Method to manually clear all caches
 def clear_caches() -> None:
     """
     Clears all caches used in this module.
-
-    This includes:
-    - The WiFi networks cache
-    - The label style cache
-    - The lock icon cache
-    - The signal icon data cache
     """
-    # Clear WiFi networks cache
-    _wifi_cache["data"] = None
-    _wifi_cache["timestamp"] = 0
+    # Clear WiFi cache
+    _wifi_cache.clear()
+
+    # Reset WiFi interface
+    global _wifi_interface
+    _wifi_interface = None
 
     # Clear lru_cache caches
     get_label_style.cache_clear()
     get_lock_icon.cache_clear()
     _get_signal_icon_data.cache_clear()
+    get_cached_wifi_icon.cache_clear()

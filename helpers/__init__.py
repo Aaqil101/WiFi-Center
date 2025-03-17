@@ -10,6 +10,7 @@ from helpers.path_utils import (
     get_and_apply_styles,
     get_downloads_directory,
 )
+from helpers.power_control import hibernate, lock, reboot, shutdown, sleep
 from helpers.wifi_disconnect import disconnect
 from helpers.wifi_networks import load_wifi_networks
 from helpers.win_style_helper import apply_window_style
@@ -20,10 +21,15 @@ __all__: list[str] = [
     "processing",
     "hide_output_box_with_animation",
     "show_output_box_with_animation",
+    "_load_stylesheet",
     "get_and_apply_styles",
     "get_downloads_directory",
+    "hibernate",
+    "lock",
+    "reboot",
+    "shutdown",
+    "sleep",
     "disconnect",
     "load_wifi_networks",
     "apply_window_style",
-    "_load_stylesheet",
 ]

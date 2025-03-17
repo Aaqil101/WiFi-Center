@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QApplication
 
 
 def center_on_screen(
-    self, *, screen_geo: QRect = None, x: int = None, y: int = None
+    self, *, screen_geometry: QRect = None, x: int = None, y: int = None
 ) -> None:
     """
     Centers the window on the screen or at specified coordinates.
@@ -17,14 +17,14 @@ def center_on_screen(
 
     Args:
         self: The window or widget instance to be centered.
-        screen_geo (QRect, optional): The geometry of the screen to center
+        screen_geometry (QRect, optional): The geometry of the screen to center
             the window on. Defaults to the primary screen's geometry.
         x (int, optional): The x-coordinate to position the window. Defaults to
             centering based on screen width.
         y (int, optional): The y-coordinate to position the window. Defaults to
             centering based on screen height.
     """
-    if screen_geo is None:
+    if screen_geometry is None:
         screen_geometry: QRect = QApplication.primaryScreen().geometry()
 
     # If x and y are not provided, compute center position

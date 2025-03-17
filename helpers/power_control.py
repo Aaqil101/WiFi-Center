@@ -4,12 +4,16 @@ import os
 import sys
 from pathlib import Path
 
-# Helpers Modules
-from center import center_on_screen
-
 # PyQt6 Modules
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMessageBox
+
+# Helpers Modules
+from helpers import center_on_screen
+
+# Add the package root to the Python path
+# NOTE:C:\Users\$USERNAME\Documents\GitHub\WiFi-Center
+sys.path.append(str(Path(__file__).parent.parent))
 
 
 def shutdown() -> None:
@@ -63,17 +67,17 @@ def _msg_box() -> bool:
     msg_box = QMessageBox()
     msg_box.setWindowTitle("Confirmation")
     msg_box.setText("Are you sure you?")
+    msg_box.setFixedSize(180, 125)
 
     icon_path: Path = str(Path(__file__).parent.parent / "assets" / "lock_icon.png")
 
     msg_box.setWindowIcon(QIcon(icon_path))
     msg_box.setIcon(QMessageBox.Icon.Warning)
-    msg_box.resize(180, 125)
     msg_box.setStandardButtons(
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
     )
     msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-    center_on_screen(msg_box, screen_geometry=app.primaryScreen().geometry())
+    center_on_screen(msg_box, screen_geo=app.primaryScreen().geometry())
     result: int = msg_box.exec()
     app.exit()
     return result == QMessageBox.StandardButton.Yes

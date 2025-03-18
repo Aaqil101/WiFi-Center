@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (
     QApplication,
     QHBoxLayout,
     QHeaderView,
-    QLineEdit,
     QTableWidget,
     QTextEdit,
     QVBoxLayout,
@@ -17,7 +16,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Core Modules
-from core import CommandProcessor, load_wifi_networks
+from core import CommandProcessor, TerminalAutoComplete, load_wifi_networks
 
 # Helpers Modules
 from helpers import (
@@ -40,10 +39,10 @@ class MasterWindow(QWidget):
 
         self.setWindowIcon(QIcon(str(icon_path)))
 
+        self.initUI()
+
         # Initialize the command processor
         self.command_processor = CommandProcessor(self)
-
-        self.initUI()
 
     def initUI(self) -> None:
         # Hidden Text Box
@@ -68,7 +67,24 @@ class MasterWindow(QWidget):
         self.configure_table()
 
         # Command Bar
-        self.command_bar = QLineEdit()
+        commands: list[str] = [
+            "quit",
+            "exit",
+            "close",
+            "terminate",
+            "disconnect",
+            "refresh",
+            "shutdown",
+            "reboot",
+            "restart",
+            "sleep",
+            "hibernate",
+            "lock",
+            "logout",
+            "connect",
+        ]
+
+        self.command_bar = TerminalAutoComplete(commands)
         self.command_bar.setFixedWidth(580)
         self.command_bar.setFixedHeight(40)
         self.command_bar.setPlaceholderText("Type here...")

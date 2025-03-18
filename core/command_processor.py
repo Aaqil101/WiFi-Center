@@ -1,11 +1,12 @@
 # Built-in Modules
-import sys
 from pathlib import Path
 
 # PyQt6 Modules
 from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import QApplication
 
 # Core Modules
+from core.wifi_disconnect import disconnect
 from core.wifi_networks import load_wifi_networks
 
 # Helpers Modules
@@ -82,17 +83,16 @@ class CommandProcessor:
         Returns:
             bool: True if command executed successfully, False otherwise
         """
-        if command in ["q", "quit", "exit", "close", "cls", "terminate"]:
-            from PyQt6.QtWidgets import QApplication
-
+        if command in ["-q", "cls", "quit", "exit", "close", "terminate"]:
             QApplication.quit()
             return True
 
-        elif command in ["d", "disconnect"]:
+        elif command in ["-d", "disconnect"]:
             self.window.testing()
+            # disconnect(self.window)
             return True
 
-        elif command in ["r", "refresh"]:
+        elif command in ["-r", "refresh"]:
             load_wifi_networks(self.window.table, force_refresh=True)
             return True
 
@@ -126,7 +126,7 @@ class CommandProcessor:
                 return True
             return False
 
-        elif command in ["c", "connect"]:
+        elif command in ["-c", "connect"]:
             print("Working on it...")
             return True
 

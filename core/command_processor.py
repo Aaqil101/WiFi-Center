@@ -6,16 +6,17 @@ from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
 # Core Modules
+from core.available_networks import open_wifi_manager
 from core.wifi_disconnect import disconnect
 from core.wifi_networks import load_wifi_networks
 
 # Helpers Modules
 from helpers import (
+    MessageBox,
     get_and_apply_styles,
     hibernate,
     hide_output_box_with_animation,
     lock_or_logout,
-    msg_box,
     processing,
     reboot,
     show_output_box_with_animation,
@@ -83,6 +84,13 @@ class CommandProcessor:
         Returns:
             bool: True if command executed successfully, False otherwise
         """
+        msg_box = MessageBox(
+            title="Confirmation",
+            text="Are you sure?",
+            fixed_size=(180, 125),
+            icon_path=Path(__file__).parent.parent / "assets" / "lock_icon.png",
+        )
+
         if command in ["-q", "cls", "quit", "exit", "close", "terminate"]:
             QApplication.quit()
             return True
@@ -97,34 +105,38 @@ class CommandProcessor:
             return True
 
         elif command in ["shutdown"]:
-            if msg_box():
+            if msg_box.show():
                 shutdown()
                 return True
             return False
 
         elif command in ["reboot", "restart"]:
-            if msg_box():
+            if msg_box.show():
                 reboot()
                 return True
             return False
 
         elif command == "sleep":
-            if msg_box():
+            if msg_box.show():
                 sleep()
                 return True
             return False
 
         elif command in ["hibernate"]:
-            if msg_box():
+            if msg_box.show():
                 hibernate()
                 return True
             return False
 
         elif command in ["lock", "logout"]:
-            if msg_box():
+            if msg_box.show():
                 lock_or_logout()
                 return True
             return False
+
+        elif command in ["-w", "wifi-manager"]:
+            open_wifi_manager(terminal="cmd")
+            return True
 
         elif command in ["-c", "connect"]:
             print("Working on it...")

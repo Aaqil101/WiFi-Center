@@ -1,3 +1,4 @@
+from core.available_networks import open_wifi_manager
 from core.command_processor import CommandProcessor
 from core.inline_autocomplete import TerminalAutoComplete
 from core.wifi_disconnect import disconnect
@@ -8,4 +9,5 @@ __all__: list[str] = [
     "CommandProcessor",
     "disconnect",
     "load_wifi_networks",
+    "open_wifi_manager",
 ]

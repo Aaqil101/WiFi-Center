@@ -1,89 +1,85 @@
-# Built-in Modules
-import sys
-
-# PyQt6 Modules
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (
-    QApplication,
-    QHeaderView,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-)
-
-# Helpers Modules
-from helpers import get_and_apply_styles, load_wifi_networks
+from PyQt6.QtCore import QStringListModel
+from PyQt6.QtWidgets import QApplication, QLineEdit, QVBoxLayout, QWidget
 
 
-class MasterWindow(QWidget):
-    def __init__(self) -> None:
+class TerminalAutoComplete(QLineEdit):
+    def __init__(self, commands, parent=None):
+        super().__init__(parent)
+        self.commands = sorted(commands)  # Sort for consistency
+        self.suggestion = ""  # Store the current suggestion
+        self.match_index = -1  # Track cycling position
+
+        self.textEdited.connect(self.show_suggestion)
+        self.returnPressed.connect(self.clear_suggestion)
+
+    def show_suggestion(self, text):
+        """Update inline autocompletion when typing."""
+        if not text:
+            self.suggestion = ""
+            return
+
+        # Find all matches
+        matches = [cmd for cmd in self.commands if cmd.startswith(text)]
+
+        if matches:
+            self.suggestion = matches[0]  # Take the first match
+            self.setText(self.suggestion)
+            self.setSelection(
+                len(text), len(self.suggestion) - len(text)
+            )  # Select the extra text
+            self.match_index = 0  # Reset cycling index
+        else:
+            self.suggestion = ""
+
+    def keyPressEvent(self, event):
+        """Handle Tab completion, Backspace, and Enter."""
+        key = event.key()
+
+        if key == 9:  # Tab Key
+            matches = [cmd for cmd in self.commands if cmd.startswith(self.text())]
+            if matches:
+                self.match_index = (self.match_index + 1) % len(
+                    matches
+                )  # Cycle through matches
+                self.suggestion = matches[self.match_index]
+                self.setText(self.suggestion)
+                self.setSelection(
+                    len(self.text()), len(self.suggestion) - len(self.text())
+                )
+            return
+
+        elif key == 16777219:  # Backspace Key
+            if self.hasSelectedText():
+                self.setText(
+                    self.text()[: self.selectionStart()]
+                )  # Remove only suggested part
+            else:
+                super().keyPressEvent(event)  # Normal behavior
+            self.suggestion = ""
+            return
+
+        super().keyPressEvent(event)  # Pass other keys to default behavior
+
+    def clear_suggestion(self):
+        """Clear the suggestion when Enter is pressed."""
+        self.suggestion = ""
+        self.setSelection(0, 0)  # Remove selection
+
+
+class MainWindow(QWidget):
+    def __init__(self):
         super().__init__()
-        self.setWindowTitle("Wi-Fi Center")
-        self.setFixedSize(600, 400)
-        self.setWindowIcon(QIcon("assets/master_icon.png"))
-
-        self.initUI()
-        load_wifi_networks(self.table)
-
-    def initUI(self) -> None:
-        self.table = QTableWidget()
-        self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels(["Network Name", "Signal Strength"])
-        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Read-only
-
-        # ✨ Customize header
-        header: QHeaderView | None = self.table.horizontalHeader()
-        header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        header.setFixedHeight(30)  # Set header height
-
-        get_and_apply_styles(
-            script_file=__file__, file="header.qss", set_content=header.setStyleSheet
-        )
-
-        # 🚀 Disable selection completely
-        self.table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        # 🚀 Fix row positions
-        self.table.verticalHeader().setSectionsMovable(False)  # Prevent dragging
-        self.table.setSortingEnabled(False)  # Prevent sorting from changing row order
-        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-        self.table.verticalHeader().setDefaultSectionSize(40)  # Fixed row height
-
-        # 🚀 Fix column positions and sizes
-        self.table.horizontalHeader().setSectionsMovable(False)  # Lock column order
-        self.table.setColumnWidth(0, 405)  # Fixed width for Network Name
-        self.table.setColumnWidth(1, 150)  # Fixed width for Signal Strength
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Fixed
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.Fixed
-        )
-
-        # 🛒 Disable vertical and horizontal scrollbars
-        self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-        # Apply custom styles
-        get_and_apply_styles(
-            script_file=__file__,
-            file="wifi_table.qss",
-            set_content=self.table.setStyleSheet,
-        )
 
         layout = QVBoxLayout()
-        layout.addWidget(self.table)
+        self.command_bar = TerminalAutoComplete(
+            ["disconnect", "shutdown", "debug", "deploy"]
+        )
+        layout.addWidget(self.command_bar)
+
         self.setLayout(layout)
 
 
-def master():
-    app = QApplication(sys.argv)
-    window = MasterWindow()
-    window.show()
-    sys.exit(app.exec())
-
-
-if __name__ == "__main__":
-    master()
+app = QApplication([])
+window = MainWindow()
+window.show()
+app.exec()

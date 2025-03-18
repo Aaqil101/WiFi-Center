@@ -82,6 +82,7 @@ class MasterWindow(QWidget):
             "lock",
             "logout",
             "connect",
+            "wifi-manager",
         ]
 
         self.command_bar = TerminalAutoComplete(commands)

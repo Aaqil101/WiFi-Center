@@ -72,8 +72,16 @@ def open_wifi_manager(*, terminal: str = None) -> None:
             unknown_terminal.show()
 
     except subprocess.CalledProcessError as e:
-        print(f"An error occurred while trying to open the Wi-Fi manager: {e}")
+        called_process_error = MessageBox(
+            title="Called Process Error",
+            text=f"An error occurred while trying to open the Wi-Fi manager: {e}",
+            fixed_size=(502, 147),
+            icon=icon,
+            buttons=button,
+            icon_path=path,
+        )
+        called_process_error.show()
 
 
 if __name__ == "__main__":
-    open_wifi_manager(terminal="powershell")
+    open_wifi_manager(terminal="cmd")

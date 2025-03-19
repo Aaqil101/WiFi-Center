@@ -2,9 +2,6 @@
 import sys
 from pathlib import Path
 
-# Markdown Module
-import markdown
-
 # PyQt6 Modules
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon, QKeyEvent
@@ -54,8 +51,10 @@ class DocumentationWindow(QMainWindow):
         self.search_bar.textChanged.connect(self.filter_topics)
         self.topic_list.itemClicked.connect(self.display_help)
 
-        # Load help topics from markdown files
-        self.topics = self.load_help_content()
+        html: Path = Path(__file__).parent / "help.html"
+
+        # Load help content from HTML
+        self.html_content = self.load_help_content(html)
         self.populate_topics()
 
         # Connect signals
@@ -91,42 +90,43 @@ class DocumentationWindow(QMainWindow):
 
         center_on_screen(self)
 
-    def load_help_content(self):
-        """Load all markdown files from the help directory."""
-        # Directory containing markdown files
-        self.help_dir: Path = Path(__file__).parent / "markdown"
+    def load_help_content(self, filename):
+        """Read the HTML file and extract topic sections."""
+        with open(filename, "r", encoding="utf-8") as file:
+            html_data = file.read()
+
+        # Extract topics from <h2> tags
+        import re
+
         topics = {}
-
-        if not self.help_dir.exists():
-            print(f"Help directory '{self.help_dir}' not found!")
-            return topics
-
-        # Use Pathlib's glob() to find .md files
-        for md_file in self.help_dir.glob("*.md"):
-            topic_name: str = md_file.stem.replace("_", " ").title()
-            with md_file.open("r", encoding="utf-8") as file:
-                topics[topic_name] = markdown.markdown(file.read())
+        matches = re.findall(r'<h2 id="(.*?)">(.*?)</h2>', html_data)
+        for topic_id, topic_name in matches:
+            start = html_data.index(f'<h2 id="{topic_id}">')
+            end = html_data.find("<h2 id=", start + 1)
+            topics[topic_name] = (
+                html_data[start:end] if end != -1 else html_data[start:]
+            )
 
         return topics
 
-    def populate_topics(self) -> None:
+    def populate_topics(self):
         """Populate the topic list."""
         self.topic_list.clear()
-        for topic in self.topics.keys():
+        for topic in self.html_content.keys():
             self.topic_list.addItem(topic)
 
-    def filter_topics(self, text) -> None:
+    def filter_topics(self, text):
         """Filter topics based on search input."""
         self.topic_list.clear()
-        for topic in self.topics.keys():
+        for topic in self.html_content.keys():
             if text.lower() in topic.lower():
                 self.topic_list.addItem(topic)
 
-    def display_help(self, item) -> None:
+    def display_help(self, item):
         """Display the selected help content."""
         topic = item.text()
         self.help_content.setHtml(
-            self.topics.get(topic, "<b>No content available.</b>")
+            self.html_content.get(topic, "<b>No content available.</b>")
         )
 
     def keyPressEvent(self, event: QKeyEvent) -> None:

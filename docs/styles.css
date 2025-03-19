@@ -1,0 +1,43 @@
+QTextBrowser {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    font-style: normal;
+    padding: 4px;
+    border: none;
+    border-radius: 4px;
+}
+
+QTextBrowser:focus {
+    background-color: #222;
+    border-bottom: 2px solid #0078d7;
+    border-right: 2px solid #0078d7;
+    font-style: unset;
+}
+
+h1 {
+    color: #1e90ff;
+    font-size: 22px;
+}
+
+QTextBrowser h2 {
+    color: #555;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+p {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+a {
+    color: #00bfff;
+    text-decoration: underline;
+}
+
+ul {
+    margin-bottom: 10px;
+}

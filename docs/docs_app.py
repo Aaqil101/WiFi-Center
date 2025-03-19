@@ -1,18 +1,18 @@
 # Built-in Modules
 import sys
 from pathlib import Path
-from typing import Any
 
 # PyQt6 Modules
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon, QKeyEvent
+from PyQt6.QtCore import QSize, Qt, QUrl
+from PyQt6.QtGui import QColor, QFont, QIcon, QKeyEvent
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import (
     QApplication,
     QLineEdit,
     QListWidget,
+    QListWidgetItem,
     QMainWindow,
     QSplitter,
-    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     sys.path.append(str(Path(__file__).parent.parent))
 
 # Helpers Modules
-from helpers import center_on_screen
+from helpers import center_on_screen, get_and_apply_styles
 
 
 class DocumentationWindow(QMainWindow):
@@ -35,130 +35,52 @@ class DocumentationWindow(QMainWindow):
 
         self.setWindowIcon(QIcon(str(icon_path)))
 
+        # Initialize UI elements
         self.initUI()
+
+        # Populate topics list from files
+        self.populate_topics()
 
     def initUI(self) -> None:
         # Create widgets
         self.search_bar = QLineEdit()  # Search bar
         self.topic_list = QListWidget()  # List of topics
-        self.help_content = QTextBrowser()  # Markdown content display
+        self.web_view = QWebEngineView()  # Html content display
 
-        self.setStyleSheet(
-            """
-            QMainWindow {
-                background-color: rgb(31, 39, 56)
-            }
-            """
-        )
+        # Get and apply styles
+        self.style_dir: Path = Path(__file__).parent / "website" / "styles.css"
+        self.style_url: str = QUrl.fromLocalFile(str(self.style_dir)).toString()
 
-        self.topic_list.setStyleSheet(
-            """
-            QListWidget {
-                background-color: rgba(255, 255, 255, 0.04);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-                font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-                    "Lucida Sans", Arial, sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-            }
+        # Set default content
+        self.web_view.setHtml(
+            f"""
+            <html>
 
-            QListWidget:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
+            <head>
+                <link rel="stylesheet" href="{self.style_url}">
+            </head>
+
+            <body>
+                <h1>Welcome to Documentation</h1>
+                <hr>
+                <p>Please select a topic from the list.</p>
+            </body>
+
+            </html>
+            """,
+            QUrl.fromLocalFile(str(Path(__file__).parent / "website")),
         )
 
         # Set placeholder text for search bar
         self.search_bar.setPlaceholderText("Search topics...")
         self.search_bar.setToolTip("Type a keyword to search help topics.")
-        self.help_content.setOpenExternalLinks(True)  # Allow clicking on links
 
-        self.help_content.setStyleSheet(
-            """
-            QTextBrowser {
-                background-color: rgba(255, 255, 255, 0.04);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-                font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-                    "Lucida Sans", Arial, sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-            }
-
-            QTextBrowser:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
-        )
-
-        self.search_bar.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: rgba(255, 255, 255, 0.04);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 14px;
-                font-weight: 700;
-                font-style: normal;
-                font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-                    "Lucida Sans", Arial, sans-serif;
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-            }
-
-            QLineEdit:focus {
-                background-color: #222;
-                border-bottom: 2px solid #0078d7;
-                border-right: 2px solid #0078d7;
-                font-style: unset;
-            }
-            """
-        )
-
-        # Connect search and navigation functionality
+        # Connect topic selection to page navigation
+        self.topic_list.itemClicked.connect(self.load_topic)
         self.search_bar.textChanged.connect(self.filter_topics)
-        self.topic_list.itemClicked.connect(self.display_help)
-
-        html: Path = Path(__file__).parent / "help.html"
-        css_file: Path = Path(__file__).parent / "styles.css"
-
-        # Load help content from HTML
-        self.html_content: dict = self.load_help_content(html)
-        self.populate_topics()
-
-        # Load CSS if available
-        self.apply_css(css_file)
-
-        # Connect signals
-        self.topic_list.itemClicked.connect(self.display_help)
 
         # Setup layout with reduced margins
         splitter = QSplitter(Qt.Orientation.Horizontal)
-
-        splitter.setStyleSheet(
-            """
-            QSplitter::handle {
-                background-color: rgb(31, 39, 56);
-            }
-
-            QSplitter::handle:horizontal {
-                background-color: rgb(31, 39, 56);
-            }
-            """
-        )
 
         left_panel = QWidget()
         left_layout = QVBoxLayout()
@@ -169,8 +91,8 @@ class DocumentationWindow(QMainWindow):
 
         # Set stretch factors for consistent sizing
         splitter.addWidget(left_panel)
-        splitter.addWidget(self.help_content)
-        splitter.setSizes([125, 600])
+        splitter.addWidget(self.web_view)
+        splitter.setSizes([140, 600])
 
         # Ensure consistent splitter handling
         splitter.setStretchFactor(0, 1)
@@ -185,53 +107,108 @@ class DocumentationWindow(QMainWindow):
 
         self.setCentralWidget(container)
 
+        get_and_apply_styles(
+            script_file=__file__,
+            set_content_funcs={
+                "background.qss": self.setStyleSheet,
+                "splitter.qss": splitter.setStyleSheet,
+                "search_bar.qss": self.search_bar.setStyleSheet,
+                "topic_list.qss": self.topic_list.setStyleSheet,
+            },
+        )
+
         center_on_screen(self)
 
-    def load_help_content(self, filename) -> dict:
-        """Read the HTML file and extract topic sections."""
-        with open(filename, "r", encoding="utf-8") as file:
-            html_data: str = file.read()
-
-        # Extract topics from <h2> tags
-        import re
-
-        topics: dict = {}
-        matches: list[Any] = re.findall(r'<h2 id="(.*?)">(.*?)</h2>', html_data)
-        for topic_id, topic_name in matches:
-            start: int = html_data.index(f'<h2 id="{topic_id}">')
-            end: int = html_data.find("<h2 id=", start + 1)
-            topics[topic_name] = (
-                html_data[start:end] if end != -1 else html_data[start:]
-            )
-
-        return topics
-
-    def apply_css(self, css_file) -> None:
-        """Apply external CSS styling to the markdown viewer."""
-        if css_file.exists():
-            with css_file.open("r", encoding="utf-8") as file:
-                css: Any = file.read()
-                self.help_content.setStyleSheet(css)
-
     def populate_topics(self) -> None:
-        """Populate the topic list."""
+        """Populate topic list with section headers"""
         self.topic_list.clear()
-        for topic in self.html_content.keys():
-            self.topic_list.addItem(topic)
+
+        # Add headers and topics
+        self.add_section_header("Getting Started")
+        self.topic_list.addItem("Introduction")
+        self.topic_list.addItem("Installation")
+
+        self.add_section_header("Features")
+        self.topic_list.addItem("Basic Features")
+        self.topic_list.addItem("Advanced Features")
+
+        self.add_section_header("Other")
+        self.topic_list.addItem("Troubleshooting")
+        self.topic_list.addItem("FAQ")
+
+    def add_section_header(self, text) -> None:
+        """Add a fully customized non-selectable section header to the list"""
+        item = QListWidgetItem(text)
+
+        # Make the item non-selectable by disabling all interactive flags
+        item.setFlags(Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsEnabled)
+
+        # Background color
+        # item.setBackground(QColor("#5f5f5f"))
+
+        # Text color
+        item.setForeground(QColor("#38656b"))
+
+        # Font customization
+        font: QFont = item.font()
+        font.setBold(True)
+
+        # Increase font size by 2 points
+        font.setPointSize(font.pointSize() + 2)
+
+        # Set font family
+        # font.setFamily("Arial")
+
+        item.setFont(font)
+
+        # Add padding with a custom size hint
+        item.setSizeHint(QSize(item.sizeHint().width(), item.sizeHint().height() + 10))
+
+        # Add a custom role to identify this as a header
+        item.setData(Qt.ItemDataRole.UserRole, "header")
+
+        self.topic_list.addItem(item)
 
     def filter_topics(self, text) -> None:
-        """Filter topics based on search input."""
-        self.topic_list.clear()
-        for topic in self.html_content.keys():
-            if text.lower() in topic.lower():
-                self.topic_list.addItem(topic)
+        """Filter topics based on search text"""
+        for i in range(self.topic_list.count()):
+            item: QListWidgetItem | None = self.topic_list.item(i)
+            item.setHidden(text.lower() not in item.text().lower())
 
-    def display_help(self, item) -> None:
-        """Display the selected help content."""
-        topic: Any = item.text()
-        self.help_content.setHtml(
-            self.html_content.get(topic, "<b>No content available.</b>")
-        )
+    def load_topic(self, item) -> None:
+        """Load a specific topic HTML file if the item is not a header"""
+        # Path to topic HTML files
+        self.website_dir: Path = Path(__file__).parent / "website"
+
+        # Skip if this is a header item
+        if item.data(Qt.ItemDataRole.UserRole) == "header":
+            return
+
+        topic_name = item.text()
+        filename = topic_name.lower().replace(" ", "_") + ".html"
+        file_path = self.website_dir / filename
+
+        if file_path.exists():
+            self.web_view.setUrl(QUrl.fromLocalFile(str(file_path)))
+        else:
+            self.web_view.setHtml(
+                f"""
+                <html>
+
+                <head>
+                    <link rel="stylesheet" href="{self.style_url}">
+                </head>
+
+                <body>
+                    <h1>Topic Not Found</h1>
+                    <hr>
+                    <p>The file for '{topic_name}' was not found.</p>
+                </body>
+
+                </html>
+                """,
+                QUrl.fromLocalFile(str(Path(__file__).parent / "website")),
+            )
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """

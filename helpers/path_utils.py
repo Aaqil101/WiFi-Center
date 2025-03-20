@@ -1,8 +1,12 @@
+# Built-in Modules
 import os
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict
+
+# Helper Modules
+from helpers import Buttons, Icons, MessageBox
 
 
 @lru_cache(maxsize=1)
@@ -47,7 +51,10 @@ def get_downloads_directory() -> str:
 
 
 def get_and_apply_styles(
-    *, script_file: str, set_content_funcs: Dict[str, Callable], clear: bool = False
+    *,
+    script_file: str,
+    set_content_funcs: Dict[str, Callable],
+    clear: bool = False,
 ) -> None:
     """
     Applies stylesheets to the respective widgets using the provided functions.
@@ -109,7 +116,14 @@ def _load_stylesheet(file_path: Path) -> str:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        print(f"⚠ Warning: Stylesheet {file_path.name} not found.")
+        msg_box = MessageBox(
+            title="Stylesheet Not Found",
+            text=f"Stylesheet {file_path.name} not found.",
+            fixed_size=(241, 125),
+            icon=Icons.Warning,
+            buttons=Buttons.Ok,
+        )
+        msg_box.show()
         return ""  # Return empty string to prevent errors
 
 

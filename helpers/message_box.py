@@ -2,6 +2,7 @@
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from turtle import width
 
 # PyQt6 Modules
 from PyQt6.QtGui import QIcon
@@ -74,7 +75,7 @@ class MessageBox:
         *,
         title: str = "Message Box",
         text: str = "This is a message box",
-        fixed_size: tuple = None,
+        fixed_size: tuple[int, int] = None,
         icon: QMessageBox.Icon = Icons.Warning,
         icon_path: Path = None,
         buttons: QMessageBox.StandardButton = Buttons.Yes | Buttons.No,
@@ -102,7 +103,7 @@ class MessageBox:
 
         self.title: str = title
         self.text: str = text
-        self.fixed_size: tuple = fixed_size
+        self.fixed_size: tuple[int, int] = fixed_size
         self.icon: QMessageBox.Icon = icon
         self.icon_path: Path = icon_path
         self.buttons: QMessageBox.StandardButton = buttons

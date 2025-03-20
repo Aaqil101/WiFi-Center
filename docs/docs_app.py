@@ -1,6 +1,10 @@
 # Built-in Modules
 import sys
+from functools import lru_cache
 from pathlib import Path
+
+# QtAwesome Modules
+import qtawesome as qta
 
 # PyQt6 Modules
 from PyQt6.QtCore import QSize, Qt, QUrl
@@ -12,6 +16,7 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMainWindow,
+    QPushButton,
     QSplitter,
     QVBoxLayout,
     QWidget,
@@ -22,7 +27,7 @@ if __name__ == "__main__":
     sys.path.append(str(Path(__file__).parent.parent))
 
 # Helpers Modules
-from helpers import center_on_screen, get_and_apply_styles
+from helpers import Blur, center_on_screen, get_and_apply_styles
 
 
 class DocumentationWindow(QMainWindow):
@@ -46,6 +51,11 @@ class DocumentationWindow(QMainWindow):
         self.search_bar = QLineEdit()  # Search bar
         self.topic_list = QListWidget()  # List of topics
         self.web_view = QWebEngineView()  # Html content display
+        self.toggle_button = QPushButton(qta.icon("mdi.menu"), "")  # Toggle sidebar
+
+        self.topic_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
 
         # Get and apply styles
         self.style_dir: Path = Path(__file__).parent / "website" / "styles.css"
@@ -75,6 +85,10 @@ class DocumentationWindow(QMainWindow):
         self.search_bar.setPlaceholderText("Search topics...")
         self.search_bar.setToolTip("Type a keyword to search help topics.")
 
+        # Button tooltip and click event
+        self.toggle_button.setToolTip("Toggle Sidebar (Ctrl+S)")
+        self.toggle_button.clicked.connect(self.toggle_sidebar)
+
         # Connect topic selection to page navigation
         self.topic_list.itemClicked.connect(self.load_topic)
         self.search_bar.textChanged.connect(self.filter_topics)
@@ -82,15 +96,16 @@ class DocumentationWindow(QMainWindow):
         # Setup layout with reduced margins
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        left_panel = QWidget()
+        self.left_panel = QWidget()
         left_layout = QVBoxLayout()
         left_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
+        left_layout.addWidget(self.toggle_button)
         left_layout.addWidget(self.search_bar)
         left_layout.addWidget(self.topic_list)
-        left_panel.setLayout(left_layout)
+        self.left_panel.setLayout(left_layout)
 
         # Set stretch factors for consistent sizing
-        splitter.addWidget(left_panel)
+        splitter.addWidget(self.left_panel)
         splitter.addWidget(self.web_view)
         splitter.setSizes([140, 600])
 
@@ -110,14 +125,64 @@ class DocumentationWindow(QMainWindow):
         get_and_apply_styles(
             script_file=__file__,
             set_content_funcs={
-                "background.qss": self.setStyleSheet,
                 "splitter.qss": splitter.setStyleSheet,
                 "search_bar.qss": self.search_bar.setStyleSheet,
                 "topic_list.qss": self.topic_list.setStyleSheet,
             },
         )
 
+        self.apply_window_style()
         center_on_screen(self)
+
+    @lru_cache(maxsize=1)
+    def is_windows_11(self) -> bool:
+        """
+        Check if the system is running Windows 11.
+
+        Returns:
+            bool: True if Windows 11 (build >= 22000), False otherwise
+        """
+        windows_build: int = sys.getwindowsversion().build
+        return windows_build >= 22000
+
+    def apply_window_style(self) -> None:
+        """
+        Applies the appropriate window style based on the Windows version.
+
+        This function checks the Windows build version to determine if the system
+        is running Windows 11 or an earlier version. Depending on the version, it
+        applies the corresponding stylesheets and settings to the window and its
+        components.
+
+        On Windows 11:
+            - Sets the window to have a translucent background.
+            - Applies styles from 'win11.qss'.
+            - Enables blur effects on the window.
+
+        On Windows 10 or earlier:
+            - Applies styles from 'win10.qss'.
+        """
+        if self.is_windows_11():
+            # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            get_and_apply_styles(
+                script_file=Path(__file__).parent,
+                set_content_funcs={
+                    "win11.qss": self.setStyleSheet,
+                },
+            )
+            Blur(self.winId(), DarkMode=True)
+        else:
+            get_and_apply_styles(
+                script_file=Path(__file__).parent,
+                set_content_funcs={
+                    "win10.qss": self.setStyleSheet,
+                },
+            )
+
+    def toggle_sidebar(self) -> None:
+        """Toggle the visibility of the search bar and topic list."""
+        is_visible = self.left_panel.isVisible()
+        self.left_panel.setVisible(not is_visible)
 
     def populate_topics(self) -> None:
         """Populate topic list with section headers"""
@@ -211,11 +276,18 @@ class DocumentationWindow(QMainWindow):
             )
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        """
-        Handles key press events for shortcuts.
-        """
+        """Handles key press events for shortcuts."""
         if event.key() == Qt.Key.Key_Escape:
             self.close()
+        elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            current_item: QListWidgetItem = self.topic_list.currentItem()
+            if current_item:
+                self.load_topic(current_item)
+        elif (
+            event.key() == Qt.Key.Key_S
+            and event.modifiers() & Qt.KeyboardModifier.ControlModifier
+        ):
+            self.toggle_sidebar()
         else:
             super().keyPressEvent(event)
 

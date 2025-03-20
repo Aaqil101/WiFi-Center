@@ -1,17 +1,17 @@
 # Built-in Modules
 import sys
-from functools import lru_cache
 from pathlib import Path
 
 # QtAwesome Modules
 import qtawesome as qta
 
 # PyQt6 Modules
-from PyQt6.QtCore import QSize, Qt, QUrl
-from PyQt6.QtGui import QColor, QFont, QIcon, QKeyEvent
+from PyQt6.QtCore import QRect, QSize, Qt, QUrl
+from PyQt6.QtGui import QColor, QFont, QIcon, QKeyEvent, QRegion
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import (
     QApplication,
+    QHBoxLayout,
     QLineEdit,
     QListWidget,
     QListWidgetItem,
@@ -27,14 +27,14 @@ if __name__ == "__main__":
     sys.path.append(str(Path(__file__).parent.parent))
 
 # Helpers Modules
-from helpers import Blur, center_on_screen, get_and_apply_styles
+from helpers import center_on_screen, get_and_apply_styles
 
 
 class DocumentationWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Documentation")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 850, 750)
 
         icon_path: Path = Path(__file__).parent / "assets" / "documentation_icon.png"
 
@@ -51,7 +51,9 @@ class DocumentationWindow(QMainWindow):
         self.search_bar = QLineEdit()  # Search bar
         self.topic_list = QListWidget()  # List of topics
         self.web_view = QWebEngineView()  # Html content display
-        self.toggle_button = QPushButton(qta.icon("mdi.menu"), "")  # Toggle sidebar
+
+        # Toggle sidebar
+        self.toggle_button = QPushButton(qta.icon("mdi.dock-left"), "")
 
         self.topic_list.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
@@ -61,127 +63,109 @@ class DocumentationWindow(QMainWindow):
         self.style_dir: Path = Path(__file__).parent / "website" / "styles.css"
         self.style_url: str = QUrl.fromLocalFile(str(self.style_dir)).toString()
 
-        # Set default content
-        self.web_view.setHtml(
-            f"""
-            <html>
-
-            <head>
-                <link rel="stylesheet" href="{self.style_url}">
-            </head>
-
-            <body>
-                <h1>Welcome to Documentation</h1>
-                <hr>
-                <p>Please select a topic from the list.</p>
-            </body>
-
-            </html>
-            """,
-            QUrl.fromLocalFile(str(Path(__file__).parent / "website")),
+        # Set default content and focus policy
+        initial_file_path: Path = (
+            Path(__file__).parent / "website" / "introduction.html"
         )
+        if initial_file_path.exists():
+            self.web_view.setUrl(QUrl.fromLocalFile(str(initial_file_path)))
+        else:
+            self.web_view.setHtml(
+                f"""
+                <html>
+                <head>
+                    <link rel="stylesheet" href="{self.style_url}">
+                </head>
+                <body>
+                    <h1>Welcome to Documentation</h1>
+                    <hr>
+                    <p>Please select a topic from the list.</p>
+                    <button onclick="window.location.href = 'introduction.html';">Go to Introduction</button>
+                    <br>
+                    <button onclick="window.location.href = 'installation.html';">Go to Installation</button>
+                    <br>
+                    <button onclick="window.location.href = 'usage.html';">Go to Usage</button>
+                    <br>
+                    <button onclick="window.location.href = 'basic_features.html';">Go to Basic Features</button>
+                    <br>
+                    <button onclick="window.location.href = 'advanced_features.html';">Go to Advanced Features</button>
+                    <br>
+                    <button onclick="window.location.href = 'troubleshooting.html';">Troubleshooting</button>
+                    <br>
+                    <button onclick="window.location.href = 'faq.html';">FAQ</button>
+                </body>
+                </html>
+                """,
+                QUrl.fromLocalFile(str(Path(__file__).parent / "website")),
+            )
+        self.web_view.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Set placeholder text for search bar
         self.search_bar.setPlaceholderText("Search topics...")
         self.search_bar.setToolTip("Type a keyword to search help topics.")
 
-        # Button tooltip and click event
+        # Button tooltip, click event and focus policy
         self.toggle_button.setToolTip("Toggle Sidebar (Ctrl+S)")
         self.toggle_button.clicked.connect(self.toggle_sidebar)
+        self.toggle_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Connect topic selection to page navigation
         self.topic_list.itemClicked.connect(self.load_topic)
         self.search_bar.textChanged.connect(self.filter_topics)
 
+        # Layout for search bar + button
+        search_layout = QHBoxLayout()
+        search_layout.setContentsMargins(
+            0, 0, 0, 0
+        )  # Remove margins for a seamless look
+        search_layout.addWidget(self.toggle_button)
+        search_layout.addWidget(self.search_bar)
+
+        # Wrap in a QWidget for correct layout behavior
+        search_widget = QWidget()
+        search_widget.setLayout(search_layout)
+
         # Setup layout with reduced margins
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        self.left_panel = QWidget()
+        left_panel = QWidget()
         left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
-        left_layout.addWidget(self.toggle_button)
-        left_layout.addWidget(self.search_bar)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.addWidget(search_widget)
         left_layout.addWidget(self.topic_list)
-        self.left_panel.setLayout(left_layout)
+        left_panel.setLayout(left_layout)
 
-        # Set stretch factors for consistent sizing
-        splitter.addWidget(self.left_panel)
+        splitter.addWidget(left_panel)
         splitter.addWidget(self.web_view)
-        splitter.setSizes([140, 600])
+        splitter.setSizes([135, 600])
 
-        # Ensure consistent splitter handling
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 3)
-
-        # Main container with no margins
         container = QWidget()
         layout = QVBoxLayout()
-        layout.setContentsMargins(10, 10, 10, 10)  # Remove container margins
+        layout.setContentsMargins(10, 10, 10, 10)
         layout.addWidget(splitter)
         container.setLayout(layout)
 
         self.setCentralWidget(container)
 
+        # Store reference for toggling sidebar
+        self.left_panel: QWidget = left_panel
+
         get_and_apply_styles(
             script_file=__file__,
             set_content_funcs={
+                "background.qss": self.setStyleSheet,
                 "splitter.qss": splitter.setStyleSheet,
                 "search_bar.qss": self.search_bar.setStyleSheet,
                 "topic_list.qss": self.topic_list.setStyleSheet,
+                "toggle_button.qss": self.toggle_button.setStyleSheet,
             },
         )
 
-        self.apply_window_style()
         center_on_screen(self)
-
-    @lru_cache(maxsize=1)
-    def is_windows_11(self) -> bool:
-        """
-        Check if the system is running Windows 11.
-
-        Returns:
-            bool: True if Windows 11 (build >= 22000), False otherwise
-        """
-        windows_build: int = sys.getwindowsversion().build
-        return windows_build >= 22000
-
-    def apply_window_style(self) -> None:
-        """
-        Applies the appropriate window style based on the Windows version.
-
-        This function checks the Windows build version to determine if the system
-        is running Windows 11 or an earlier version. Depending on the version, it
-        applies the corresponding stylesheets and settings to the window and its
-        components.
-
-        On Windows 11:
-            - Sets the window to have a translucent background.
-            - Applies styles from 'win11.qss'.
-            - Enables blur effects on the window.
-
-        On Windows 10 or earlier:
-            - Applies styles from 'win10.qss'.
-        """
-        if self.is_windows_11():
-            # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-            get_and_apply_styles(
-                script_file=Path(__file__).parent,
-                set_content_funcs={
-                    "win11.qss": self.setStyleSheet,
-                },
-            )
-            Blur(self.winId(), DarkMode=True)
-        else:
-            get_and_apply_styles(
-                script_file=Path(__file__).parent,
-                set_content_funcs={
-                    "win10.qss": self.setStyleSheet,
-                },
-            )
 
     def toggle_sidebar(self) -> None:
         """Toggle the visibility of the search bar and topic list."""
-        is_visible = self.left_panel.isVisible()
+        is_visible: bool = self.left_panel.isVisible()
         self.left_panel.setVisible(not is_visible)
 
     def populate_topics(self) -> None:
@@ -208,11 +192,8 @@ class DocumentationWindow(QMainWindow):
         # Make the item non-selectable by disabling all interactive flags
         item.setFlags(Qt.ItemFlag.NoItemFlags | Qt.ItemFlag.ItemIsEnabled)
 
-        # Background color
-        # item.setBackground(QColor("#5f5f5f"))
-
         # Text color
-        item.setForeground(QColor("#38656b"))
+        item.setForeground(QColor("#4682B4"))
 
         # Font customization
         font: QFont = item.font()
@@ -222,7 +203,7 @@ class DocumentationWindow(QMainWindow):
         font.setPointSize(font.pointSize() + 2)
 
         # Set font family
-        # font.setFamily("Arial")
+        font.setFamily("Segoe UI")
 
         item.setFont(font)
 
@@ -277,9 +258,7 @@ class DocumentationWindow(QMainWindow):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """Handles key press events for shortcuts."""
-        if event.key() == Qt.Key.Key_Escape:
-            self.close()
-        elif event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             current_item: QListWidgetItem = self.topic_list.currentItem()
             if current_item:
                 self.load_topic(current_item)
@@ -288,6 +267,9 @@ class DocumentationWindow(QMainWindow):
             and event.modifiers() & Qt.KeyboardModifier.ControlModifier
         ):
             self.toggle_sidebar()
+            self.search_bar.setFocus()
+        elif event.key() == Qt.Key.Key_Escape:
+            self.close()
         else:
             super().keyPressEvent(event)
 
@@ -300,6 +282,7 @@ def main() -> None:
 
     app = QApplication(sys.argv)
     window = DocumentationWindow()
+    window.search_bar.setFocus()
     window.show()
 
     elapsed_time: float = timer.elapsed() / 1000  # Convert to seconds

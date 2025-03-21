@@ -8,6 +8,76 @@
 
 <body>
     <h2 id="basic-features">Basic Features</h2>
+    <p>The application includes the following basic features:</p>
+    <ul>
+        <li>
+            <b> Network Scanner:</b> Scan and display available WiFi
+            networks.
+            <p>The application automatically scans for available Wi-Fi networks and displays them in a table. The
+                table shows the network name and the signal strength.</p>
+        </li>
+        <li>
+            <b> Connection Manager:</b> Connect to and manage WiFi networks.
+            <p>To connect to a Wi-Fi network, select the network from the table and enter the password. The
+                application will then connect to the network.</p>
+        </li>
+        <li>
+            <b> Command Bar:</b> Execute commands to manage the application.
+            <p>The command bar allows you to enter commands to perform various actions, such as disconnecting from the
+                current network, refreshing the list of networks, shutting down the system, rebooting the system, etc.
+                Type <code>help</code> to see a list of available commands.</p>
+        </li>
+        <li><b> Help:</b> Access this help guide for assistance.
+            <p>This help guide provides detailed instructions on how to use the application.</p>
+        </li>
+    </ul>
+
+    <h2 id="command-processor">Command Processor</h2>
+    <p>The <code>CommandProcessor</code> class handles the processing of user input and the execution of commands.</p>
+
+    <h3 id="commands">Commands</h3>
+    <ul>
+        <li><code>quit</code>, <code>exit</code>, <code>close</code>, <code>terminate</code>: Quits the application.
+        </li>
+        <li><code>disconnect</code>: Disconnects from the current network.</li>
+        <li><code>refresh</code>: Refreshes the list of networks.</li>
+        <li><code>shutdown</code>: Shuts down the system.</li>
+        <li><code>reboot</code>, <code>restart</code>: Reboots the system.</li>
+        <li><code>sleep</code>: Puts the system to sleep.</li>
+        <li><code>hibernate</code>: Hibernates the system.</li>
+        <li><code>lock</code>, <code>logout</code>: Locks the system or logs out the current user.</li>
+        <li><code>wifi-manager</code>: Opens the Wi-Fi manager.</li>
+        <li><code>connect</code>: Connects to a specified network.</li>
+        <li><code>help</code>: Displays a list of available commands.</li>
+    </ul>
+
+    <h2 id="terminal-autocomplete">Terminal AutoComplete</h2>
+    <p>The <code>TerminalAutoComplete</code> class provides auto-completion functionality for the command bar.</p>
+    <p>It extends the <code>QLineEdit</code> widget and suggests commands as the user types, Cycles through suggestions
+        using the Tab key.</p>
+
+    <h2 id="ui-elements">UI Elements</h2>
+    <p>The application's user interface consists of the following elements:</p>
+
+    <ul>
+        <li>
+            <b> Main Window:</b>
+            <p>The main window displays the list of available Wi-Fi networks and the command bar.</p>
+        </li>
+        <li>
+            <b> Network Table:</b>
+            <p>The network table displays the list of available Wi-Fi networks and their signal strengths.</p>
+        </li>
+        <li>
+            <b> Command Bar:</b>
+            <p>The command bar allows the user to enter commands to perform various actions.</p>
+        </li>
+        <li>
+            <b> Output Box:</b>
+            <p>The output box displays messages to the user.</p>
+        </li>
+    </ul>
 </body>
 
 </html>
+<script src="foldable.js"></script>

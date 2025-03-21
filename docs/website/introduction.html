@@ -3,37 +3,55 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <h2 id="introduction">Introduction</h2>
-    <hr>
+    <h1 id="introduction">Introduction</h1>
     <p>
-        Welcome to the Help Guide! This guide will assist you in using the
+        Welcome to the Wi-Fi Center Help Guide! This guide will assist you in using the
         application. Here you will find detailed instructions on how to
         navigate and utilize the features of the application.
     </p>
 
-    <h3 id="how-to-use">How To Use</h3>
-    <hr>
-    <p>Follow these steps to get started with the application:</p>
+    <p>
+        Wi-Fi Center is a PyQt6 application that allows you to manage your Wi-Fi connections.
+        With Wi-Fi Center, you can:
+    </p>
     <ul>
-        <li>Open the main window.</li>
-        <li>Click on a feature.</li>
-        <li>Follow the instructions provided for each feature.</li>
+        <li>Scan for available Wi-Fi networks.</li>
+        <li>Connect to Wi-Fi networks.</li>
+        <li>Disconnect from Wi-Fi networks.</li>
+        <li>Manage your Wi-Fi connections using commands.</li>
     </ul>
 
+    <h3 id="how-to-use">How To Use</h3>
+    <p>Follow these steps to get started with the application:</p>
+    <div role="region" aria-label="How to Use Steps">
+        <ol>
+            <li>Open the application.</li>
+            <li>Select a Wi-Fi network.</li>
+            <li>Enter the password and connect.</li>
+        </ol>
+    </div>
+
     <h3 id="contact-support">Contact Support</h3>
-    <hr>
     <p>If you need further assistance, please contact our support team or creating an issue on Github:</p>
-    <ul>
-        <li>Email: mohammedaaqililyas01@gmail.com</li>
-        <li>
-            Website: <a href="https://github.com/Aaqil101/WiFi-Center"><button>WiFi-Center</button></a>
-        </li>
-        </li>
-    </ul>
+    <div class="contact-container">
+        <div class="contact-item">
+            <strong>Email:</strong> mohammedaaqililyas01@gmail.com
+        </div>
+        <div class="contact-item">
+            <strong>Website:</strong>
+            <a href="https://github.com/Aaqil101/WiFi-Center" class="btn"
+                aria-label="View WiFi Center GitHub repository" role="button">WiFi-Center</a>
+        </div>
+    </div>
 </body>
 
 </html>
+<script src="foldable.js"></script>

@@ -6,8 +6,8 @@ from pathlib import Path
 import qtawesome as qta
 
 # PyQt6 Modules
-from PyQt6.QtCore import QRect, QSize, Qt, QUrl
-from PyQt6.QtGui import QColor, QFont, QIcon, QKeyEvent, QRegion
+from PyQt6.QtCore import QSize, Qt, QTimer, QUrl
+from PyQt6.QtGui import QColor, QFont, QIcon, QKeyEvent
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import (
     QApplication,
@@ -34,7 +34,7 @@ class DocumentationWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Documentation")
-        self.setGeometry(100, 100, 850, 750)
+        self.setGeometry(100, 100, 850, 710)
 
         icon_path: Path = Path(__file__).parent / "assets" / "documentation_icon.png"
 
@@ -78,7 +78,6 @@ class DocumentationWindow(QMainWindow):
                 </head>
                 <body>
                     <h1>Welcome to Documentation</h1>
-                    <hr>
                     <p>Please select a topic from the list.</p>
                     <button onclick="window.location.href = 'introduction.html';">Go to Introduction</button>
                     <br>
@@ -183,6 +182,7 @@ class DocumentationWindow(QMainWindow):
 
         self.add_section_header("Other")
         self.topic_list.addItem("Troubleshooting")
+        self.topic_list.addItem("Contributions")
         self.topic_list.addItem("FAQ")
 
     def add_section_header(self, text) -> None:
@@ -231,26 +231,35 @@ class DocumentationWindow(QMainWindow):
             return
 
         topic_name = item.text()
-        filename = topic_name.lower().replace(" ", "_") + ".html"
+        topic_name = item.text()
+        filename = topic_name.lower().replace(" ", "_").replace("-", "_") + ".html"
         file_path = self.website_dir / filename
 
+        loading_path: Path = Path(__file__).parent / "website" / "loading.html"
+        if loading_path.exists():
+            self.web_view.setUrl(QUrl.fromLocalFile(str(loading_path)))
+        else:
+            pass
+
+        QTimer.singleShot(
+            250,  # Delay in milliseconds
+            lambda: self.load_actual_topic(topic_name, file_path),
+        )
+
+    def load_actual_topic(self, topic_name, file_path) -> None:
         if file_path.exists():
             self.web_view.setUrl(QUrl.fromLocalFile(str(file_path)))
         else:
             self.web_view.setHtml(
                 f"""
                 <html>
-
-                <head>
-                    <link rel="stylesheet" href="{self.style_url}">
-                </head>
-
-                <body>
-                    <h1>Topic Not Found</h1>
-                    <hr>
-                    <p>The file for '{topic_name}' was not found.</p>
-                </body>
-
+                    <head>
+                        <link rel="stylesheet" href="{self.style_url}">
+                    </head>
+                    <body>
+                        <h1>Topic Not Found</h1>
+                        <p>The file for '{topic_name}' was not found.</p>
+                    </body>
                 </html>
                 """,
                 QUrl.fromLocalFile(str(Path(__file__).parent / "website")),

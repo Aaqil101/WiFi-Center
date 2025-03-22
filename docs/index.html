@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/docs_app.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <!-- Search bar and toggle button -->
+            <div class="search-container">
+                <button id="toggle-sidebar" title="Toggle Sidebar (Ctrl+S)">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <input type="text" id="search-bar" placeholder="Search topics..."
+                    title="Type a keyword to search help topics.">
+            </div>
+
+            <!-- Topic list -->
+            <div id="topic-list">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Content area -->
+        <div id="content-container">
+            <iframe id="content-frame" title="Documentation Content"></iframe>
+        </div>
+    </div>
+
+    <script src="scripts/navigation.js"></script>
+</body>
+
+</html>

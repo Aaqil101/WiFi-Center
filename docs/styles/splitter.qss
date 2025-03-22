@@ -1,8 +1,0 @@
-/* Splitter */
-QSplitter::handle {
-    background-color: rgba(42, 48, 59, 0.04);
-}
-
-QSplitter::handle:horizontal {
-    background-color: rgba(42, 48, 59, 0.04);
-}

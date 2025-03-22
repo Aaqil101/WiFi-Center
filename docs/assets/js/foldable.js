@@ -18,15 +18,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (contentElements.length > 0) {
+            // Create a container div for all content elements
+            var container = document.createElement("div");
+            container.className = "header-content";
+
             // Add arrow element
             var arrow = document.createElement("span");
             arrow.className = "header-arrow";
             arrow.innerHTML = "▼";
-            header.insertBefore(arrow, header.firstChild);
-
-            // Create a container div for all content elements
-            var container = document.createElement("div");
-            container.className = "header-content";
 
             // Insert the container after the header
             header.parentNode.insertBefore(
@@ -43,6 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
             buttonElements.forEach(function (button) {
                 header.parentNode.insertBefore(button, container.nextSibling);
             });
+
+            header.insertBefore(arrow, header.firstChild);
 
             // Set initial state based on header level
             if (header.tagName === "H3") {

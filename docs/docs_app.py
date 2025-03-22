@@ -1,10 +1,13 @@
 # Built-in Modules
 import sys
+import webbrowser
 from pathlib import Path
+from urllib.parse import urlparse
 
 # PyQt6 Modules
-from PyQt6.QtCore import QEvent, Qt, QUrl
-from PyQt6.QtGui import QIcon, QKeyEvent, QKeySequence, QShortcut
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
+from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 
@@ -20,9 +23,11 @@ class DocumentationWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Documentation")
-        self.setGeometry(100, 100, 850, 710)
+        self.setGeometry(100, 100, 1100, 700)
 
-        icon_path: Path = Path(__file__).parent / "assets" / "documentation_icon.png"
+        icon_path: Path = (
+            Path(__file__).parent / "assets" / "icons" / "documentation_icon.png"
+        )
 
         self.setWindowIcon(QIcon(str(icon_path)))
 
@@ -32,6 +37,10 @@ class DocumentationWindow(QMainWindow):
     def initUI(self) -> None:
         # Html content display
         self.web_view = QWebEngineView()
+
+        # Create a custom page to handle link navigation
+        self.custom_page = CustomWebPage(self.web_view)
+        self.web_view.setPage(self.custom_page)
 
         self.setStyleSheet(
             """
@@ -95,6 +104,29 @@ class DocumentationWindow(QMainWindow):
         # ESC shortcut to close window
         close_shortcut = QShortcut(QKeySequence("Esc"), self)
         close_shortcut.activated.connect(self.close)
+
+
+class CustomWebPage(QWebEnginePage):
+    def acceptNavigationRequest(self, url, _type, isMainFrame) -> bool:
+        url_string = url.toString()
+
+        # For navigation by clicking on links
+        if _type == QWebEnginePage.NavigationType.NavigationTypeLinkClicked:
+            # Determine if this is an internal or external link
+            parsed_url = urlparse(url_string)
+
+            # Check if it's a local file or an external URL
+            if parsed_url.scheme in ("http", "https") and not url_string.startswith(
+                "file:"
+            ):
+                # Open external links in default browser
+                webbrowser.open(url_string)
+                return False
+            # Allow navigation to local documentation files
+            return True
+
+        # Allow other navigation requests (initial page load, etc.)
+        return super().acceptNavigationRequest(url, _type, isMainFrame)
 
 
 def main() -> None:

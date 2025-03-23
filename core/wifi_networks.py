@@ -1,6 +1,8 @@
 # Built-in Modules
+import json
 import time
 from functools import lru_cache
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 # QtAwesome Modules
@@ -38,6 +40,9 @@ class WifiCache:
         self.data = None
         self.timestamp = 0
 
+
+# Constants
+WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
 
 # Global WiFi cache instance
 _wifi_cache = WifiCache(timeout_seconds=10)
@@ -95,6 +100,7 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
 
     The list is sorted by signal strength in descending order (strongest first).
     Results are cached to improve performance with a timeout of 10 seconds.
+    Primarily reads from the JSON file created by the background scanner.
 
     Args:
         force_refresh: If True, ignores cached data and fetches fresh data
@@ -108,59 +114,81 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
         return _wifi_cache.data
 
     try:
-        Iface: iface.Interface | None = get_wifi_interface()
-        if not Iface:
-            return []
+        # Load from file (primary method)
+        with open(WIFI_DATA_FILE, "r") as f:
+            wifi_data = json.load(f)
 
-        # Get saved profiles (connections) once
-        saved_profiles: Set[str] = {
-            profile.ssid for profile in Iface.network_profiles()
-        }
-
-        # Trigger scan
-        Iface.scan()
-
-        # Wait just enough time for the scan to complete
-        time.sleep(0.8)  # Reduced from 1.0 second for performance
-
-        # Get scan results
-        scan_results: list = Iface.scan_results()
-
-        # Process scan results more efficiently
-        networks_dict: Dict[str, Tuple[str, int, bool]] = {}
-
-        for result in scan_results:
-            ssid: str = result.ssid
-            if not ssid:  # Skip networks with empty SSIDs
-                continue
-
-            # Convert signal strength (dBm) to percentage (0-100%)
-            # Signal range is typically -30 dBm (excellent) to -90 dBm (poor)
-            signal_strength: int = min(max(0, (result.signal + 100) * 2), 100)
-            signal_percent = int(signal_strength)
-
-            # Check if authentication is required (simplified check)
-            requires_login: bool = (
-                result.akm[0] != const.AKM_TYPE_NONE and ssid not in saved_profiles
-            )
-
-            # Keep only the strongest signal for each SSID
-            if ssid not in networks_dict or signal_percent > networks_dict[ssid][1]:
-                networks_dict[ssid] = (ssid, signal_percent, requires_login)
-
-        # Convert to list and sort only once
-        result: List[Tuple[str | int | bool]] = sorted(
-            networks_dict.values(), key=lambda x: x[1], reverse=True
-        )[:6]
+        # Convert loaded data to the expected format and remove duplicates
+        seen_ssids = set()
+        result: List[Tuple[str, int, bool]] = []
+        for item in wifi_data:
+            ssid = item["ssid"]
+            if ssid not in seen_ssids:
+                result.append((ssid, item["strength"], item["requires_login"]))
+                seen_ssids.add(ssid)
 
         # Update cache with the result
         _wifi_cache.update(result)
-
         return result
 
-    except Exception as e:
-        print(f"Error retrieving Wi-Fi networks: {e}")
-        return []
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error reading Wi-Fi data from file: {e}. Falling back to scanning.")
+
+        # Fallback to direct scanning only if file doesn't exist or is corrupt
+        # This code will only run if the background scanner isn't working
+        try:
+            Iface: iface.Interface | None = get_wifi_interface()
+            if not Iface:
+                return []
+
+            # Get saved profiles (connections) once
+            saved_profiles: Set[str] = {
+                profile.ssid for profile in Iface.network_profiles()
+            }
+
+            # Trigger scan
+            Iface.scan()
+
+            # Wait just enough time for the scan to complete
+            time.sleep(0.8)
+
+            # Get scan results
+            scan_results: list = Iface.scan_results()
+
+            # Process scan results more efficiently
+            networks_dict: Dict[str, Tuple[str, int, bool]] = {}
+
+            for result in scan_results:
+                ssid: str = result.ssid
+                if not ssid:  # Skip networks with empty SSIDs
+                    continue
+
+                # Convert signal strength (dBm) to percentage (0-100%)
+                signal_strength: int = min(max(0, (result.signal + 100) * 2), 100)
+                signal_percent = int(signal_strength)
+
+                # Check if authentication is required (simplified check)
+                requires_login: bool = (
+                    result.akm[0] != const.AKM_TYPE_NONE and ssid not in saved_profiles
+                )
+
+                # Keep only the strongest signal for each SSID
+                if ssid not in networks_dict or signal_percent > networks_dict[ssid][1]:
+                    networks_dict[ssid] = (ssid, signal_percent, requires_login)
+
+            # Convert to list and sort only once
+            result: List[Tuple[str, int, bool]] = sorted(
+                networks_dict.values(), key=lambda x: x[1], reverse=True
+            )[:6]
+
+            # Update cache with the result
+            _wifi_cache.update(result)
+
+            return result
+
+        except Exception as e:
+            print(f"Error retrieving Wi-Fi networks: {e}")
+            return []
 
 
 # Styling constants to avoid string repetition

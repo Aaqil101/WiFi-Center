@@ -16,6 +16,9 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel, QTableWidget, QWidget
 # PyWiFi Modules
 from pywifi import PyWiFi, const, iface
 
+# Helpers Modules
+from helpers import Buttons, Icons, MessageBox
+
 
 class WifiCache:
     """A class to handle WiFi network caching with timeout functionality."""
@@ -42,10 +45,11 @@ class WifiCache:
 
 
 # Constants
-WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
+WIFI_DATA_FILE: Path = Path(__file__).parent / "scanner" / "wifi_data.json"
 
 # Global WiFi cache instance
 _wifi_cache = WifiCache(timeout_seconds=10)
+
 # Global PyWiFi interface (initialized once)
 _wifi_interface = None
 
@@ -132,7 +136,14 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
         return result
 
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error reading Wi-Fi data from file: {e}. Falling back to scanning.")
+        msg_box = MessageBox(
+            title="Json File Not Found",
+            text=f"Error reading Wi-Fi data from file: {e}. Falling back to scanning.",
+            fixed_size=(502, 147),
+            icon=Icons.Critical,
+            buttons=Buttons.Ok,
+        )
+        msg_box.show()
 
         # Fallback to direct scanning only if file doesn't exist or is corrupt
         # This code will only run if the background scanner isn't working
@@ -184,7 +195,7 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
             # Update cache with the result
             _wifi_cache.update(result)
 
-            return result
+            return result[:6]  # Return only the top 6
 
         except Exception as e:
             print(f"Error retrieving Wi-Fi networks: {e}")

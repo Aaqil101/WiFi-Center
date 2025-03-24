@@ -163,4 +163,4 @@ cython_debug/
 #.idea/
 
 # Data
-core/auto/wifi_data.json
+core/scanner/wifi_data.json

@@ -1,50 +1,41 @@
 #!/usr/bin/env python3
 # wifi_scanner.py - Background script to scan for Wi-Fi networks with system tray icon and PyQt6 GUI
 
+# Build-in Modules
 import datetime
-import io
 import json
 import os
-import signal
 import sys
 import threading
 import time
 from pathlib import Path
-from typing import Dict, List, Literal, Set
+from typing import Dict, List, Set
+
+# PyQt6 Modules
+from PyQt6.QtCore import QObject, Qt, pyqtSignal
+from PyQt6.QtGui import QAction, QIcon, QPixmap
+from PyQt6.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QPushButton,
+    QSystemTrayIcon,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 # PyWiFi Modules
-try:
-    from pywifi import PyWiFi, const, iface
-except ImportError:
-    print("Error: pywifi module not found. Please install with 'pip install pywifi'")
-    sys.exit(1)
-
-# PyQt6 for GUI
-try:
-    from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
-    from PyQt6.QtGui import QAction, QIcon, QImage, QPixmap
-    from PyQt6.QtWidgets import (
-        QApplication,
-        QHBoxLayout,
-        QLabel,
-        QMainWindow,
-        QMenu,
-        QPushButton,
-        QSystemTrayIcon,
-        QTextEdit,
-        QVBoxLayout,
-        QWidget,
-    )
-except ImportError:
-    print("Error: PyQt6 modules not found. Please install with 'pip install PyQt6'")
-    sys.exit(1)
+from pywifi import PyWiFi, const, iface
 
 # Constants
-WIFI_DATA_FILE = Path(__file__).parent / "wifi_data.json"
-SCAN_INTERVAL = 2  # seconds between scans
+WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
+SCAN_INTERVAL = 1  # seconds between scans
 running = True
 last_scan_time = None
-log_messages = []
+log_messages: list = []
 MAX_LOG_MESSAGES = 100
 
 # For Windows console hiding
@@ -65,10 +56,10 @@ class Signals(QObject):
 signals = Signals()
 
 
-def log(message):
+def log(message) -> None:
     """Log a message to console and emit signal for GUI."""
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_entry = f"[{timestamp}] {message}"
+    timestamp: str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_entry: str = f"[{timestamp}] {message}"
     print(log_entry)
 
     # Add to log messages
@@ -103,7 +94,7 @@ def scan_wifi_networks() -> List[Dict]:
     """
     global last_scan_time
 
-    interface = get_wifi_interface()
+    interface: iface.Interface = get_wifi_interface()
 
     # Get saved profiles (connections)
     saved_profiles: Set[str] = {
@@ -141,7 +132,7 @@ def scan_wifi_networks() -> List[Dict]:
             ssid not in networks_dict
             or signal_percent > networks_dict[ssid]["strength"]
         ):
-            current_time = time.strftime(
+            current_time: str = time.strftime(
                 "%Y-%m-%d %H:%M:%S", time.localtime(time.time())
             )
             networks_dict[ssid] = {
@@ -170,32 +161,7 @@ def save_to_json(networks: List[Dict]) -> None:
         log(f"Error saving to {WIFI_DATA_FILE}: {e}")
 
 
-def create_tray_icon():
-    """Generate a WiFi icon for the system tray."""
-    from PIL import Image, ImageDraw
-
-    # Create an image with a transparent background
-    width = 64
-    height = 64
-    color1 = (255, 255, 255)  # White
-
-    # Create a new image with a transparent background
-    image = Image.new("RGBA", (width, height), color=(0, 0, 0, 0))
-    dc = ImageDraw.Draw(image)
-
-    # Draw a simple WiFi icon
-    dc.arc([10, 10, 54, 54], 0, 180, fill=color1, width=3)
-    dc.arc([20, 20, 44, 44], 0, 180, fill=color1, width=3)
-    dc.arc([30, 30, 34, 34], 0, 180, fill=color1, width=3)
-
-    # Save to a byte array
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format="PNG")
-
-    return img_byte_arr.getvalue()
-
-
-def scanner_process():
+def scanner_process() -> None:
     """Main scanning process that runs in the background."""
     global running
 
@@ -212,12 +178,20 @@ def scanner_process():
 
 
 class ConsoleWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Set window properties
         self.setWindowTitle("WiFi Scanner Console")
         self.setMinimumSize(700, 500)
+
+        # Set window icon
+        window_icon_path: Path = (
+            Path(__file__).parent.parent.parent
+            / "assets"
+            / "wifi_scanner_window_icon.png"
+        )
+        self.setWindowIcon(QIcon(str(window_icon_path)))
 
         # Create central widget and layout
         central_widget = QWidget()
@@ -262,25 +236,25 @@ class ConsoleWindow(QMainWindow):
         if last_scan_time:
             self.update_scan_time(last_scan_time)
 
-    def add_log(self, message):
+    def add_log(self, message) -> None:
         """Add a log message to the display."""
         self.log_display.append(message)
         # Scroll to bottom
         scrollbar = self.log_display.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
 
-    def update_scan_time(self, time_str):
+    def update_scan_time(self, time_str) -> None:
         """Update the last scan time display."""
         self.scan_time_label.setText(f"Last scan: {time_str}")
 
-    def clear_log(self):
+    def clear_log(self) -> None:
         """Clear the log display."""
         self.log_display.clear()
         global log_messages
         log_messages = []
         log("Log cleared")
 
-    def force_scan(self):
+    def force_scan(self) -> None:
         """Force an immediate scan."""
         log("Manual scan initiated")
         # Run in a separate thread to avoid freezing UI
@@ -294,7 +268,7 @@ class ConsoleWindow(QMainWindow):
         save_to_json(networks)
         log(f"Manual scan complete - found {len(networks)} networks")
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         """Handle window close event."""
         # Just hide the window instead of closing the application
         event.ignore()
@@ -302,7 +276,7 @@ class ConsoleWindow(QMainWindow):
 
 
 class WiFiScannerApp(QApplication):
-    def __init__(self, args):
+    def __init__(self, args) -> None:
         super().__init__(args)
 
         self.setQuitOnLastWindowClosed(False)
@@ -314,7 +288,13 @@ class WiFiScannerApp(QApplication):
         self.tray_icon = QSystemTrayIcon(self)
 
         # Create tray icon
-        icon_data = create_tray_icon()
+        tray_icon_path: Path = (
+            Path(__file__).parent.parent.parent
+            / "assets"
+            / "wifi_scanner_tray_icon.png"
+        )
+        with open(tray_icon_path, "rb") as f:
+            icon_data: bytes = f.read()
         pixmap = QPixmap()
         pixmap.loadFromData(icon_data)
         self.tray_icon.setIcon(QIcon(pixmap))
@@ -345,25 +325,25 @@ class WiFiScannerApp(QApplication):
         self.scanner_thread.daemon = True
         self.scanner_thread.start()
 
-    def show_console(self):
+    def show_console(self) -> None:
         """Show the console window."""
         self.console.show()
         self.console.raise_()
         self.console.activateWindow()
 
-    def view_data(self):
+    def view_data(self) -> None:
         """Open the data file."""
         if os.name == "nt":
             os.startfile(WIFI_DATA_FILE)
         else:
             os.system(f"open {WIFI_DATA_FILE}")
 
-    def tray_activated(self, reason):
+    def tray_activated(self, reason) -> None:
         """Handle tray icon activation (double-click)."""
         if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
             self.show_console()
 
-    def quit_app(self):
+    def quit_app(self) -> None:
         """Quit the application."""
         global running
         running = False

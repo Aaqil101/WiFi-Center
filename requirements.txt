@@ -10,4 +10,3 @@ pystray==0.19.5
 pywifi==1.1.12
 QtAwesome==1.4.0
 QtPy==2.4.3
-six==1.17.0

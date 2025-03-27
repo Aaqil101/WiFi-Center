@@ -1,6 +1,6 @@
 /* Title Label */
 QLabel {
-    background-color: rgba(158, 42, 44, 0.81);
+    background-color: rgba(158, 42, 44, 0.75);
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
     font-size: 20px;

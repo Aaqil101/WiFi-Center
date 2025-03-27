@@ -8,6 +8,7 @@ import os
 import sys
 import threading
 import time
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Set
 
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Helpers Modules
-from helpers import get_and_apply_styles
+from helpers import Blur, get_and_apply_styles
 
 # Constants
 WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
@@ -208,7 +209,6 @@ class ConsoleWindow(QMainWindow):
 
         # Last scan time label
         self.scan_time_label = QLabel("Last scan: Not scanned yet")
-        self.scan_time_label.setStyleSheet("font-size: 12px; font-weight: bold;")
         self.scan_time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(self.scan_time_label)
 
@@ -242,8 +242,12 @@ class ConsoleWindow(QMainWindow):
                 "last_scan_time.qss": self.scan_time_label.setStyleSheet,
                 "clear_button.qss": self.clear_button.setStyleSheet,
                 "force_scan_button.qss": self.scan_button.setStyleSheet,
+                "log_display.qss": self.log_display.setStyleSheet,
             },
         )
+
+        # Apply window style
+        self.apply_window_style()
 
         # Load existing logs
         for msg in log_messages:
@@ -252,6 +256,35 @@ class ConsoleWindow(QMainWindow):
         # Update scan time if available
         if last_scan_time:
             self.update_scan_time(last_scan_time)
+
+    @lru_cache(maxsize=1)
+    def is_windows_11(self) -> bool:
+        """
+        Check if the system is running Windows 11.
+
+        Returns:
+            bool: True if Windows 11 (build >= 22000), False otherwise
+        """
+        windows_build: int = sys.getwindowsversion().build
+        return windows_build >= 22000
+
+    def apply_window_style(self) -> None:
+        if self.is_windows_11():
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            get_and_apply_styles(
+                script_file=__file__,
+                set_content_funcs={
+                    "win11.qss": self.setStyleSheet,
+                },
+            )
+            Blur(self.winId(), DarkMode=True)
+        else:
+            get_and_apply_styles(
+                script_file=__file__,
+                set_content_funcs={
+                    "win10.qss": self.setStyleSheet,
+                },
+            )
 
     def add_log(self, message) -> None:
         """Add a log message to the display."""
@@ -279,7 +312,7 @@ class ConsoleWindow(QMainWindow):
         scan_thread.daemon = True
         scan_thread.start()
 
-    def perform_scan(self):
+    def perform_scan(self) -> None:
         """Perform the actual scan operation."""
         networks = scan_wifi_networks()
         save_to_json(networks)

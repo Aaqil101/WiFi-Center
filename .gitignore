@@ -162,5 +162,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Data
+# Core Items
 core/scanner/wifi_data.json
+core/scanner/_MEI*/
+core/scanner/WiFi-Scanner.exe

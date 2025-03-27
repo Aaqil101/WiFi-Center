@@ -5,22 +5,25 @@
 import datetime
 import json
 import os
+import socket
 import sys
 import threading
 import time
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Callable, Dict, List, Set
 
 # PyQt6 Modules
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
-from PyQt6.QtGui import QAction, QIcon, QPixmap
+from PyQt6.QtGui import QAction, QIcon, QKeyEvent, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QMenu,
+    QMessageBox,
     QPushButton,
     QScrollBar,
     QSystemTrayIcon,
@@ -32,12 +35,8 @@ from PyQt6.QtWidgets import (
 # PyWiFi Modules
 from pywifi import PyWiFi, const, iface
 
-if __name__ == "__main__":
-    # Add the package root to the Python path
-    sys.path.append(str(Path(__file__).parent.parent.parent))
-
-# Helpers Modules
-from helpers import Blur, get_and_apply_styles
+# Scan Helpers Modules
+from scan_helpers import Blur, get_and_apply_styles
 
 # Constants
 WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
@@ -54,6 +53,46 @@ if os.name == "nt":
     console_hwnd = ctypes.windll.kernel32.GetConsoleWindow()
     # Hide the console window initially
     ctypes.windll.user32.ShowWindow(console_hwnd, 0)
+
+
+# Single Instance Check
+class SingleInstance:
+    """Ensure only one instance of the application is running."""
+
+    def __init__(self, port=50000) -> None:
+        """
+        Initialize single instance check using a socket.
+
+        Args:
+            port (int): Port to use for single instance check
+        """
+        self.port = port
+        self.socket = None
+
+    def already_running(self) -> bool:
+        """
+        Check if another instance is already running.
+
+        Returns:
+            bool: True if another instance is running, False otherwise
+        """
+        try:
+            # Try to create a socket and bind to a specific port
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.bind(("127.0.0.1", self.port))
+            self.socket.listen(1)
+            return False
+        except socket.error:
+            # Port is already in use, meaning another instance is running
+            return True
+
+    def __del__(self) -> None:
+        """Close the socket when the object is deleted."""
+        if hasattr(self, "socket") and self.socket:
+            try:
+                self.socket.close()
+            except:
+                pass
 
 
 # Signal class for cross-thread communication
@@ -192,13 +231,11 @@ class ConsoleWindow(QMainWindow):
 
         # Set window properties
         self.setWindowTitle("WiFi Scanner Console")
-        self.setMinimumSize(700, 500)
+        self.setMinimumSize(650, 490)
 
         # Set window icon
         window_icon_path: Path = (
-            Path(__file__).parent.parent.parent
-            / "assets"
-            / "wifi_scanner_window_icon.png"
+            Path(__file__).parent / "assets" / "wifi_scanner_window_icon.png"
         )
         self.setWindowIcon(QIcon(str(window_icon_path)))
 
@@ -336,12 +373,11 @@ class WiFiScannerApp(QApplication):
 
         # Create system tray icon
         self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setToolTip("WiFi Scanner")
 
         # Create tray icon
         tray_icon_path: Path = (
-            Path(__file__).parent.parent.parent
-            / "assets"
-            / "wifi_scanner_tray_icon.png"
+            Path(__file__).parent / "assets" / "wifi_scanner_tray_icon.png"
         )
         with open(tray_icon_path, "rb") as f:
             icon_data: bytes = f.read()
@@ -404,6 +440,19 @@ class WiFiScannerApp(QApplication):
 
 def main():
     """Main function to run the Wi-Fi scanner with PyQt6 GUI."""
+    # Check for single instance
+    single_instance = SingleInstance()
+
+    if single_instance.already_running():
+        # Show message box
+        app = QApplication(sys.argv)
+        QMessageBox.warning(
+            None,
+            "WiFi Scanner",
+            "Another instance of WiFi Scanner is already running.",
+            QMessageBox.StandardButton.Ok,
+        )
+        sys.exit(1)
 
     # Create Qt application
     app = WiFiScannerApp(sys.argv)

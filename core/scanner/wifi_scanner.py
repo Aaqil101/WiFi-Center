@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMenu,
     QPushButton,
+    QScrollBar,
     QSystemTrayIcon,
     QTextEdit,
     QVBoxLayout,
@@ -30,9 +31,16 @@ from PyQt6.QtWidgets import (
 # PyWiFi Modules
 from pywifi import PyWiFi, const, iface
 
+if __name__ == "__main__":
+    # Add the package root to the Python path
+    sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Helpers Modules
+from helpers import get_and_apply_styles
+
 # Constants
 WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
-SCAN_INTERVAL = 1  # seconds between scans
+SCAN_INTERVAL = 1
 running = True
 last_scan_time = None
 log_messages: list = []
@@ -156,7 +164,7 @@ def save_to_json(networks: List[Dict]) -> None:
     """Save network data to JSON file."""
     try:
         with open(WIFI_DATA_FILE, "w") as f:
-            json.dump(networks, f, indent=2)
+            json.dump(networks, f, indent=4)
     except Exception as e:
         log(f"Error saving to {WIFI_DATA_FILE}: {e}")
 
@@ -228,6 +236,15 @@ class ConsoleWindow(QMainWindow):
         signals.update_log.connect(self.add_log)
         signals.update_scan_time.connect(self.update_scan_time)
 
+        get_and_apply_styles(
+            script_file=__file__,
+            set_content_funcs={
+                "last_scan_time.qss": self.scan_time_label.setStyleSheet,
+                "clear_button.qss": self.clear_button.setStyleSheet,
+                "force_scan_button.qss": self.scan_button.setStyleSheet,
+            },
+        )
+
         # Load existing logs
         for msg in log_messages:
             self.log_display.append(msg)
@@ -240,7 +257,7 @@ class ConsoleWindow(QMainWindow):
         """Add a log message to the display."""
         self.log_display.append(message)
         # Scroll to bottom
-        scrollbar = self.log_display.verticalScrollBar()
+        scrollbar: QScrollBar | None = self.log_display.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
 
     def update_scan_time(self, time_str) -> None:

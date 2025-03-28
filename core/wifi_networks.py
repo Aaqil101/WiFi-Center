@@ -1,6 +1,7 @@
 # Built-in Modules
 import json
 import subprocess
+import sys
 import time
 from functools import lru_cache
 from pathlib import Path
@@ -104,36 +105,38 @@ def load_wifi_networks(table: QTableWidget, *, force_refresh: bool = False) -> N
 
 def is_wifi_scanner_running() -> bool:
     """
-    Check if WiFi-Scanner.exe is currently running.
+    Check if wifi_scanner.py is currently running.
 
     Returns:
         bool: True if the process is running, False otherwise
     """
-    for proc in psutil.process_iter(["name"]):
-        if proc.info["name"] == "WiFi-Scanner.exe":
-            return True
+    for proc in psutil.process_iter(["name", "cmdline"]):
+        try:
+            # Check if the process name is python and the script is wifi_scanner.py
+            if (proc.info["name"] in ["python", "python.exe", "python3"]) and any(
+                "wifi_scanner.py" in cmd for cmd in proc.info["cmdline"]
+            ):
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
     return False
 
 
-def start_wifi_scanner() -> None:
+def start_wifi_scanner():
     """
-    Start the WiFi-Scanner.exe executable if it's not already running.
-    Raises an exception if the executable cannot be started.
+    Start the wifi_scanner.py script if it's not already running.
+    Raises an exception if the script cannot be started.
     """
     try:
-        # Ensure the executable path is correct
-        wifi_scanner_path: Path = Path(__file__).parent / "scanner" / "WiFi-Scanner.exe"
-        script_path: Path = Path(__file__).parent / "scanner" / "start_executable.ahk"
+        # Determine the full path to the script
+        script_path: Path = Path(__file__).parent / "scanner" / "wifi_scanner.py"
 
-        if not wifi_scanner_path.exists():
-            raise FileNotFoundError(
-                f"WiFi-Scanner.exe not found at {wifi_scanner_path}"
-            )
+        if not script_path.exists():
+            raise FileNotFoundError(f"wifi_scanner.py not found at {script_path}")
 
-        # Start the process if not running
+        # Start the script using the system's default Python interpreter
         subprocess.Popen(
-            ["start", str(script_path)],
-            shell=True,
+            [sys.executable, script_path],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -142,8 +145,8 @@ def start_wifi_scanner() -> None:
         time.sleep(1)
     except Exception as e:
         start_msg_box = MessageBox(
-            title="Error Starting WiFi-Scanner",
-            text=f"Error starting WiFi-Scanner: {e}",
+            title="Starting Error",
+            text=f"Error starting wifi_scanner.py: {e}",
             fixed_size=(502, 131),
             icon=Icons.Critical,
             buttons=Buttons.Ok,
@@ -167,19 +170,19 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
         A list of tuples containing the available Wi-Fi networks and their properties
         Each tuple contains (ssid, signal_strength, requires_login)
     """
-    # Check if WiFi-Scanner is running, start it if not
+    # Check if wifi_scanner.py is running, start it if not
     if not is_wifi_scanner_running():
         try:
             start_wifi_scanner()
         except Exception as e:
-            not_start_msg_box = MessageBox(
-                title="Error Starting WiFi-Scanner",
-                text=f"Could not start WiFi-Scanner: {e}",
+            not_started_msg_box = MessageBox(
+                title="Starting Error",
+                text=f"Could not start wifi_scanner.py: {e}",
                 fixed_size=(502, 131),
                 icon=Icons.Critical,
                 buttons=Buttons.Ok,
             )
-            not_start_msg_box.show()
+            not_started_msg_box.show()
             return []
 
     # Use cached data if available and not forced to refresh
@@ -267,7 +270,13 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
             return result[:6]  # Return only the top 6
 
         except Exception as e:
-            print(f"Error retrieving Wi-Fi networks: {e}")
+            retrieving_msg_box = MessageBox(
+                title="Retrieving Error",
+                text=f"Error retrieving Wi-Fi networks: {e}",
+                icon=Icons.Critical,
+                buttons=Buttons.Ok,
+            )
+            retrieving_msg_box.show()
             return []
 
 

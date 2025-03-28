@@ -23,6 +23,27 @@ if ($Help) {
     exit # Exit the script after displaying the help message
 }
 
+# Confirm if the user is in the correct directory
+$currentDir = Get-Location
+if ($currentDir.Path -notlike "*core\scanner") {
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "|| You are not in the core/scanner    ||" -ForegroundColor Cyan
+    Write-Host "|| directory. Would you like to       ||" -ForegroundColor Cyan
+    Write-Host "|| navigate to the correct directory? ||" -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+
+    $response = Read-Host "Enter 'yes' to navigate or 'no' to exit"
+    if ($response -eq "yes") {
+        Set-Location -Path ".\core\scanner"
+        Write-Host "Navigated to .\core\scanner directory. Please run the script again." -ForegroundColor Green
+        exit
+    }
+    else {
+        Write-Host "Exiting script. Please navigate to the correct directory and try again." -ForegroundColor Red
+        exit
+    }
+}
+
 # Check if WiFi-Scanner.exe exists
 $exePath = Join-Path -Path $PSScriptRoot -ChildPath "WiFi-Scanner.exe"
 if (Test-Path $exePath) {
@@ -36,30 +57,6 @@ if (Test-Path $exePath) {
     }
     else {
         Write-Host "Rebuild canceled. Exiting script." -ForegroundColor Red
-        exit
-    }
-}
-
-# Confirm if the user is in the correct directory
-$currentDir = Get-Location
-if ($currentDir.Path -ne $PSScriptRoot) {
-    Write-Host "========================================" -ForegroundColor Yellow
-    Write-Host "|| You are not in the same directory  ||" -ForegroundColor Yellow
-    Write-Host "|| as the script.                     ||" -ForegroundColor Yellow
-    Write-Host "========================================" -ForegroundColor Yellow
-    $response = Read-Host "Would you like to change to the correct directory? (yes/no)"
-    if ($response -eq "yes") {
-        try {
-            Set-Location -Path $PSScriptRoot
-            Write-Host "Directory changed to $PSScriptRoot. Proceeding with the build..." -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Failed to change directory. Please navigate to the core/scanner folder and run the script manually." -ForegroundColor Red
-            exit
-        }
-    }
-    else {
-        Write-Host "Please navigate to the core/scanner folder and run the script manually." -ForegroundColor Red
         exit
     }
 }
@@ -183,6 +180,8 @@ if ($ClearTerminal) {
     # Wait for 2 seconds before clearing the terminal again
     Start-Sleep -Seconds 2
     Clear-Host
+    Clear-Host
+    Clear-Host
 }
 else {
     Write-Host "========================================" -ForegroundColor Green
@@ -193,5 +192,6 @@ else {
 # Exit the Terminal if the parameter is provided.
 # This exits the terminal if the -ExitTerminal parameter is used.
 if ($ExitTerminal) {
+    $host.SetShouldExit(0)
     exit
 }

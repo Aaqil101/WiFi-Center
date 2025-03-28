@@ -1,9 +1,13 @@
 # Built-in Modules
 import json
+import subprocess
 import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+
+# Psutil Modules
+import psutil
 
 # QtAwesome Modules
 import qtawesome as qta
@@ -98,6 +102,56 @@ def load_wifi_networks(table: QTableWidget, *, force_refresh: bool = False) -> N
         table.setCellWidget(row, 1, get_signal_icon(strength))
 
 
+def is_wifi_scanner_running() -> bool:
+    """
+    Check if WiFi-Scanner.exe is currently running.
+
+    Returns:
+        bool: True if the process is running, False otherwise
+    """
+    for proc in psutil.process_iter(["name"]):
+        if proc.info["name"] == "WiFi-Scanner.exe":
+            return True
+    return False
+
+
+def start_wifi_scanner() -> None:
+    """
+    Start the WiFi-Scanner.exe executable if it's not already running.
+    Raises an exception if the executable cannot be started.
+    """
+    try:
+        # Ensure the executable path is correct
+        wifi_scanner_path: Path = Path(__file__).parent / "scanner" / "WiFi-Scanner.exe"
+        script_path: Path = Path(__file__).parent / "scanner" / "start_executable.ahk"
+
+        if not wifi_scanner_path.exists():
+            raise FileNotFoundError(
+                f"WiFi-Scanner.exe not found at {wifi_scanner_path}"
+            )
+
+        # Start the process if not running
+        subprocess.Popen(
+            ["start", str(script_path)],
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        # Wait a short time to ensure the process starts
+        time.sleep(1)
+    except Exception as e:
+        start_msg_box = MessageBox(
+            title="Error Starting WiFi-Scanner",
+            text=f"Error starting WiFi-Scanner: {e}",
+            fixed_size=(502, 131),
+            icon=Icons.Critical,
+            buttons=Buttons.Ok,
+        )
+        start_msg_box.show()
+        raise
+
+
 def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]]:
     """
     Retrieves a list of available Wi-Fi networks and their respective signal strengths.
@@ -113,6 +167,21 @@ def get_wifi_networks(force_refresh: bool = False) -> List[Tuple[str, int, bool]
         A list of tuples containing the available Wi-Fi networks and their properties
         Each tuple contains (ssid, signal_strength, requires_login)
     """
+    # Check if WiFi-Scanner is running, start it if not
+    if not is_wifi_scanner_running():
+        try:
+            start_wifi_scanner()
+        except Exception as e:
+            not_start_msg_box = MessageBox(
+                title="Error Starting WiFi-Scanner",
+                text=f"Could not start WiFi-Scanner: {e}",
+                fixed_size=(502, 131),
+                icon=Icons.Critical,
+                buttons=Buttons.Ok,
+            )
+            not_start_msg_box.show()
+            return []
+
     # Use cached data if available and not forced to refresh
     if not force_refresh and _wifi_cache.is_valid():
         return _wifi_cache.data

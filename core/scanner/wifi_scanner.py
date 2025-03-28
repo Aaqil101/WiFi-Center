@@ -39,7 +39,7 @@ from pywifi import PyWiFi, const, iface
 from scan_helpers import Blur, get_and_apply_styles
 
 # Constants
-WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
+WIFI_DATA_FILE: Path = Path(__file__).parent.parent / "wifi_data.json"
 SCAN_INTERVAL = 1
 running = True
 last_scan_time = None

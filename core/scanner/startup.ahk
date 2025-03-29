@@ -12,7 +12,7 @@ Shift key is +
 Control key is ^
 */
 
-wifi_scanner := A_ScriptDir . "/wifi_scanner.py"
+wifi_scanner := A_ScriptDir . "/WiFi-Scanner.exe"
 
 Run(wifi_scanner)
 

@@ -38,9 +38,19 @@ from pywifi import PyWiFi, const, iface
 # Scan Helpers Modules
 from scan_helpers import Blur, get_and_apply_styles
 
+# Import Cython-optimized functions
+try:
+    from wifi_scanner_cy import cy_scan_wifi_networks  # type: ignore
+
+    using_cython = True
+    print("Using Cython-optimized scanning functions")
+except ImportError:
+    using_cython = False
+    print("Cython module not found, using pure Python implementation")
+
 # Constants
 WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
-SCAN_INTERVAL = 1
+SCAN_INTERVAL = 0.5
 running = True
 last_scan_time = None
 log_messages: list = []
@@ -137,6 +147,8 @@ def scan_wifi_networks() -> List[Dict]:
     """
     Scan for available Wi-Fi networks.
 
+    This is the pure Python version used as fallback if Cython is not available.
+
     Returns:
         A list of dictionaries containing network information
     """
@@ -200,6 +212,30 @@ def scan_wifi_networks() -> List[Dict]:
     return result[:6]  # Return top 6 networks by signal strength
 
 
+def optimized_scan_wifi_networks() -> List[Dict]:
+    """
+    Wrapper function that uses Cython implementation if available,
+    otherwise falls back to pure Python version.
+
+    Returns:
+        A list of dictionaries containing network information
+    """
+    global last_scan_time
+
+    if using_cython:
+        # Use Cython optimized version
+        networks = cy_scan_wifi_networks()
+    else:
+        # Use pure Python version
+        networks = scan_wifi_networks()
+
+    # Update last scan time (moved from scan_wifi_networks)
+    last_scan_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    signals.update_scan_time.emit(last_scan_time)
+
+    return networks
+
+
 def save_to_json(networks: List[Dict]) -> None:
     """Save network data to JSON file."""
     try:
@@ -214,10 +250,11 @@ def scanner_process() -> None:
     global running
 
     log("WiFi scanner started")
+    log("Cython optimization: " + ("Enabled" if using_cython else "Disabled"))
 
     try:
         while running:
-            networks = scan_wifi_networks()
+            networks = optimized_scan_wifi_networks()
             save_to_json(networks)
             log(f"Scanned {len(networks)} networks")
             time.sleep(SCAN_INTERVAL)
@@ -249,6 +286,18 @@ class ConsoleWindow(QMainWindow):
         self.scan_time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(self.scan_time_label)
 
+        # Optimization status label
+        self.optimization_label = QLabel(
+            f"Cython optimization: {'Enabled' if using_cython else 'Disabled'}"
+        )
+        self.optimization_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        labels_layout = QHBoxLayout()
+        labels_layout.addWidget(self.scan_time_label)
+        labels_layout.addWidget(self.optimization_label)
+
+        main_layout.addLayout(labels_layout)
+
         # Log display
         self.log_display = QTextEdit()
         self.log_display.setReadOnly(True)
@@ -277,6 +326,7 @@ class ConsoleWindow(QMainWindow):
             script_file=__file__,
             set_content_funcs={
                 "last_scan_time.qss": self.scan_time_label.setStyleSheet,
+                "optimization_label.qss": self.optimization_label.setStyleSheet,
                 "clear_button.qss": self.clear_button.setStyleSheet,
                 "force_scan_button.qss": self.scan_button.setStyleSheet,
                 "log_display.qss": self.log_display.setStyleSheet,
@@ -351,7 +401,7 @@ class ConsoleWindow(QMainWindow):
 
     def perform_scan(self) -> None:
         """Perform the actual scan operation."""
-        networks = scan_wifi_networks()
+        networks = optimized_scan_wifi_networks()
         save_to_json(networks)
         log(f"Manual scan complete - found {len(networks)} networks")
 

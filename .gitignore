@@ -29,6 +29,14 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Cython generated C files
+*.c
+
+# Compiled extensions
+*.so
+*.pyd
+*.dll
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.

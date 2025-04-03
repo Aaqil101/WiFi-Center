@@ -1,4 +1,7 @@
 # Built-in Modules
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 # PyQt6 Modules
@@ -7,11 +10,14 @@ from PyQt6.QtWidgets import QApplication
 
 # Core Modules
 from core.available_networks import open_wifi_manager
+from core.wifi_connect import WiFiConnectionManager
 from core.wifi_disconnect import disconnect
 from core.wifi_networks import load_wifi_networks
 
 # Helpers Modules
 from helpers import (
+    Buttons,
+    Icons,
     MessageBox,
     get_and_apply_styles,
     hibernate,
@@ -34,6 +40,7 @@ class CommandProcessor:
             window: Reference to the MasterWindow instance
         """
         self.window = window
+        self.wifi_manager = WiFiConnectionManager(window)  # Initialize the WiFi manager
 
     def process_input(self, input_text: str) -> None:
         """
@@ -91,13 +98,22 @@ class CommandProcessor:
             icon_path=Path(__file__).parent.parent / "assets" / "lock_icon.png",
         )
 
+        # First try to process WiFi commands (c=WIFINAME or p=PASSWORD)
+        success, message = self.wifi_manager.process_wifi_command(command)
+        if message != "not_wifi_command":
+            if success:
+                self.wifi_manager._show_success_message(message)
+                return True
+            else:
+                self.wifi_manager._show_error_message(message)
+                return False
+
         if command in ["-q", "cls", "quit", "exit", "close", "terminate"]:
             QApplication.quit()
             return True
 
         elif command in ["-d", "disconnect"]:
-            self.window.testing()
-            # disconnect(self.window)
+            disconnect(self.window)
             return True
 
         elif command in ["-r", "refresh"]:
@@ -143,8 +159,34 @@ class CommandProcessor:
             return True
 
         elif command in ["-h", "--help"]:
-            print("Working on it...")
-            return True
+            try:
+                # Determine the full path to the script
+                docs_app_path: Path = (
+                    Path(__file__).parent.parent / "docs" / "docs_app.py"
+                )
+
+                if not docs_app_path.exists():
+                    raise FileNotFoundError(f"docs_app.py not found at {docs_app_path}")
+
+                # Start the script using the system's default Python interpreter
+                subprocess.Popen(
+                    [sys.executable, docs_app_path],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+
+                # Wait a short time to ensure the process starts
+                time.sleep(1)
+            except Exception as e:
+                start_msg_box = MessageBox(
+                    title="Starting Error",
+                    text=f"Error starting {e}",
+                    fixed_size=(502, 131),
+                    icon=Icons.Critical,
+                    buttons=Buttons.Ok,
+                )
+                start_msg_box.show()
+                raise
 
         else:
             self._show_invalid_command_message()

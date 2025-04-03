@@ -122,7 +122,7 @@ def is_wifi_scanner_running() -> bool:
     return False
 
 
-def start_wifi_scanner():
+def start_wifi_scanner() -> None:
     """
     Start the wifi_scanner.py script if it's not already running.
     Raises an exception if the script cannot be started.

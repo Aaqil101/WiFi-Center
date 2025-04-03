@@ -6,6 +6,7 @@
         "boundscheck",
         "bssid",
         "Cantarell",
+        "CCMP",
         "cdivision",
         "comtypes",
         "cythonize",

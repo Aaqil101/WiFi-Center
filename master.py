@@ -166,41 +166,6 @@ class MasterWindow(QWidget):
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def testing(self) -> None:
-        """Just for testing purposes"""
-        import random
-
-        processing(self, begin=True)
-
-        number: int = random.randint(0, 1)
-
-        if number == 1:
-            get_and_apply_styles(
-                script_file=__file__,
-                set_content_funcs={
-                    "output_box_success.qss": self.output_box.setStyleSheet
-                },
-            )
-            self.output_box.setPlainText("✅ Success")
-
-        if number == 0:
-            get_and_apply_styles(
-                script_file=__file__,
-                set_content_funcs={
-                    "output_box_failure.qss": self.output_box.setStyleSheet
-                },
-            )
-            self.output_box.setPlainText("❌ Failure")
-
-        # Show the output box with animation
-        show_output_box_with_animation(self)
-
-        # Hide the output box after 1 seconds and then enable the command bar
-        QTimer.singleShot(1000, lambda: hide_output_box_with_animation(self))
-
-        # Enable the command bar after the hide animation is complete (1200ms total)
-        QTimer.singleShot(1200, lambda: processing(self, end=True))
-
     def check_input(self) -> None:
         """
         Handles user input from the command bar.

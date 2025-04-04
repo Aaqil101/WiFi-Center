@@ -1,4 +1,5 @@
 # Built-in Modules
+import re
 import subprocess
 import sys
 import time
@@ -10,7 +11,6 @@ from PyQt6.QtWidgets import QApplication
 
 # Core Modules
 from core.available_networks import open_wifi_manager
-from core.wifi_connect import WiFiConnectionManager
 from core.wifi_disconnect import disconnect
 from core.wifi_networks import load_wifi_networks
 
@@ -40,7 +40,6 @@ class CommandProcessor:
             window: Reference to the MasterWindow instance
         """
         self.window = window
-        self.wifi_manager = WiFiConnectionManager(window)  # Initialize the WiFi manager
 
     def process_input(self, input_text: str) -> None:
         """
@@ -65,14 +64,22 @@ class CommandProcessor:
         if index >= len(commands):
             return
 
-        # Get current command
-        current_command: str = commands[index].strip().lower()
+        # Get current command (preserve original case for SSID)
+        current_command: str = commands[index].strip()
 
         # Process current command
         command_result: bool = self.execute_command(current_command)
 
         # If command uses animation, wait for animation to complete
-        if current_command in ["d", "disconnect"] or not command_result:
+        # Check connect command using original case, others using lowercase
+        is_connect_cmd = self._is_connect_command(current_command)
+        command_lower = current_command.lower()  # Convert only for non-connect checks
+
+        if (
+            command_lower in ["-d", "disconnect"]
+            or not command_result
+            or is_connect_cmd
+        ):
             # For commands with animation or invalid commands, wait for animation to complete
             QTimer.singleShot(
                 2000, lambda: self._execute_command_chain(commands, index + 1)
@@ -91,6 +98,8 @@ class CommandProcessor:
         Returns:
             bool: True if command executed successfully, False otherwise
         """
+        command_lower: str = command.lower()
+
         msg_box = MessageBox(
             title="Confirmation",
             text="Are you sure?",
@@ -98,67 +107,54 @@ class CommandProcessor:
             icon_path=Path(__file__).parent.parent / "assets" / "lock_icon.png",
         )
 
-        # First try to process WiFi commands (c=WIFINAME or p=PASSWORD)
-        success, message = self.wifi_manager.process_wifi_command(command)
-        if message != "not_wifi_command":
-            if success:
-                self.wifi_manager._show_success_message(message)
-                return True
-            else:
-                self.wifi_manager._show_error_message(message)
-                return False
-
-        if command in ["-q", "cls", "quit", "exit", "close", "terminate"]:
+        # Match other commands using the lowercase version
+        if command_lower in ["-q", "cls", "quit", "exit", "close", "terminate"]:
             QApplication.quit()
             return True
 
-        elif command in ["-d", "disconnect"]:
+        elif command_lower in ["-d", "disconnect"]:
             disconnect(self.window)
             return True
 
-        elif command in ["-r", "refresh"]:
+        elif command_lower in ["-r", "refresh"]:
             load_wifi_networks(self.window.table, force_refresh=True)
             return True
 
-        elif command in ["shutdown"]:
+        elif command_lower in ["shutdown"]:
             if msg_box.show():
                 shutdown()
                 return True
             return False
 
-        elif command in ["reboot", "restart"]:
+        elif command_lower in ["reboot", "restart"]:
             if msg_box.show():
                 reboot()
                 return True
             return False
 
-        elif command == "sleep":
+        elif command_lower == "sleep":
             if msg_box.show():
                 sleep()
                 return True
             return False
 
-        elif command in ["hibernate"]:
+        elif command_lower in ["hibernate"]:
             if msg_box.show():
                 hibernate()
                 return True
             return False
 
-        elif command in ["lock", "logout"]:
+        elif command_lower in ["lock", "logout"]:
             if msg_box.show():
                 lock_or_logout()
                 return True
             return False
 
-        elif command in ["-w", "wifi-manager"]:
+        elif command_lower in ["-w", "wifi-manager"]:
             open_wifi_manager(terminal="cmd")
             return True
 
-        elif command in ["-c", "connect"]:
-            print("Working on it...")
-            return True
-
-        elif command in ["-h", "--help"]:
+        elif command_lower in ["-h", "--help"]:
             try:
                 # Determine the full path to the script
                 docs_app_path: Path = (

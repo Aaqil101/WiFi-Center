@@ -71,15 +71,9 @@ class CommandProcessor:
         command_result: bool = self.execute_command(current_command)
 
         # If command uses animation, wait for animation to complete
-        # Check connect command using original case, others using lowercase
-        is_connect_cmd = self._is_connect_command(current_command)
-        command_lower = current_command.lower()  # Convert only for non-connect checks
+        command_lower: str = current_command.lower()
 
-        if (
-            command_lower in ["-d", "disconnect"]
-            or not command_result
-            or is_connect_cmd
-        ):
+        if command_lower in ["-d", "disconnect"] or not command_result:
             # For commands with animation or invalid commands, wait for animation to complete
             QTimer.singleShot(
                 2000, lambda: self._execute_command_chain(commands, index + 1)
@@ -153,6 +147,9 @@ class CommandProcessor:
         elif command_lower in ["-w", "wifi-manager"]:
             open_wifi_manager(terminal="cmd")
             return True
+
+        elif command_lower in ["-c", "connect"]:
+            print("Working on it...")
 
         elif command_lower in ["-h", "--help"]:
             try:

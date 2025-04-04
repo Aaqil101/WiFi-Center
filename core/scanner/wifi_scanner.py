@@ -9,14 +9,13 @@ import socket
 import sys
 import threading
 import time
-from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, List, Set
+from typing import Dict, List, Set
 
 # PyQt6 Modules
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
-from PyQt6.QtGui import QAction, QIcon, QKeyEvent, QPixmap
+from PyQt6.QtGui import QAction, QIcon, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QHBoxLayout,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # wifi_scanner.py - Background script to scan for Wi-Fi networks with system tray icon and PyQt6 GUI
 
-# Build-in Modules
+# Built-in Modules
 import datetime
 import json
 import os

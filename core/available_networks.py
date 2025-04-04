@@ -1,4 +1,4 @@
-# Build-in Modules
+# Built-in Modules
 import subprocess
 import sys
 from pathlib import Path

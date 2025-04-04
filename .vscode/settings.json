@@ -43,6 +43,7 @@
         "Verdana",
         "WIFINAME",
         "WINDOWCOMPOSITIONATTRIBDATA",
-        "wlan"
+        "wlan",
+        "WPAPSK"
     ]
 }

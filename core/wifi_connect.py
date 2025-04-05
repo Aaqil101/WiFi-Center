@@ -9,9 +9,6 @@ from pathlib import Path
 # PyWiFi Modules
 import pywifi
 
-# Connect Helpers Modules
-from connect_helpers import Blur, center_on_screen, get_and_apply_styles
-
 # PyQt6 Modules
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -27,6 +24,13 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+if __name__ == "__main__":
+    # Add the package root to the Python path
+    sys.path.append(str(Path(__file__).parent.parent))
+
+# Helpers Modules
+from helpers import Blur, center_on_screen, get_and_apply_styles
+
 
 class PasswordDialog(QDialog):
     def __init__(self, ssid, parent=None) -> None:
@@ -40,7 +44,9 @@ class PasswordDialog(QDialog):
         self.setWindowTitle("Connect to Wi-Fi Network")
         self.setFixedSize(400, 250)
 
-        icon_path: Path = Path(__file__).parent / "assets" / "connect_to_wifi_icon.png"
+        icon_path: Path = (
+            Path(__file__).parent.parent / "assets" / "connect_to_wifi_icon.png"
+        )
 
         self.setWindowIcon(QIcon(str(icon_path)))
 
@@ -90,7 +96,7 @@ class PasswordDialog(QDialog):
 
         # Apply styles
         get_and_apply_styles(
-            script_file=__file__,
+            script_file=Path(__file__).parent,
             set_content_funcs={
                 "cancel_button.qss": self.cancel_button.setStyleSheet,
                 "next_button.qss": self.next_button.setStyleSheet,
@@ -98,6 +104,7 @@ class PasswordDialog(QDialog):
                 "wifi_label.qss": wifi_label.setStyleSheet,
                 "password_edit.qss": self.password_edit.setStyleSheet,
                 "show_password.qss": self.show_password.setStyleSheet,
+                "line.qss": line.setStyleSheet,
             },
         )
 
@@ -167,7 +174,7 @@ class PasswordDialog(QDialog):
         if self.is_windows_11():
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
             get_and_apply_styles(
-                script_file=__file__,
+                script_file=Path(__file__).parent,
                 set_content_funcs={
                     "win11.qss": self.setStyleSheet,
                 },
@@ -175,7 +182,7 @@ class PasswordDialog(QDialog):
             Blur(self.winId(), DarkMode=True)
         else:
             get_and_apply_styles(
-                script_file=__file__,
+                script_file=Path(__file__).parent,
                 set_content_funcs={
                     "win10.qss": self.setStyleSheet,
                 },

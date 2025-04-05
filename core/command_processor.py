@@ -1,5 +1,4 @@
 # Built-in Modules
-import re
 import subprocess
 import sys
 import time
@@ -11,6 +10,7 @@ from PyQt6.QtWidgets import QApplication
 
 # Core Modules
 from core.available_networks import open_wifi_manager
+from core.wifi_connect import WiFiConnector
 from core.wifi_disconnect import disconnect
 from core.wifi_networks import load_wifi_networks
 
@@ -40,6 +40,7 @@ class CommandProcessor:
             window: Reference to the MasterWindow instance
         """
         self.window = window
+        self.wifi_connector = WiFiConnector()
 
     def process_input(self, input_text: str) -> None:
         """
@@ -68,12 +69,13 @@ class CommandProcessor:
         current_command: str = commands[index].strip()
 
         # Process current command
-        command_result: bool = self.execute_command(current_command)
+        if current_command.startswith("-c ") or current_command.startswith("connect "):
+            command_result: bool = self.execute_command(current_command)
+        else:
+            command_result: bool = self.execute_command(current_command.lower())
 
         # If command uses animation, wait for animation to complete
-        command_lower: str = current_command.lower()
-
-        if command_lower in ["-d", "disconnect"] or not command_result:
+        if current_command in ["-d", "disconnect"] or not command_result:
             # For commands with animation or invalid commands, wait for animation to complete
             QTimer.singleShot(
                 2000, lambda: self._execute_command_chain(commands, index + 1)
@@ -148,8 +150,62 @@ class CommandProcessor:
             open_wifi_manager(terminal="cmd")
             return True
 
-        elif command_lower in ["-c", "connect"]:
-            print("Working on it...")
+        elif command.startswith("-c ") or command.startswith("connect "):
+            # Extract the SSID from the command
+            parts = command.split(" ", 1)
+            if len(parts) == 2 and parts[1].strip():
+                ssid = parts[1].strip()
+
+                # Show processing animation
+                processing(self.window, begin=True)
+
+                # Prepare to connect using the WiFiConnector
+                result = self.wifi_connector.process_input(f"connect={ssid}")
+
+                # Display result in output box
+                get_and_apply_styles(
+                    script_file=Path(__file__).parent,
+                    set_content_funcs={
+                        (
+                            "output_box_success.qss"
+                            if "Successfully" in result
+                            else "output_box_failure.qss"
+                        ): self.window.output_box.setStyleSheet
+                    },
+                )
+                self.window.output_box.setPlainText(result)
+
+                # Show the output box with animation
+                show_output_box_with_animation(self.window)
+
+                # Hide the output box after 3 seconds and enable the command bar
+                QTimer.singleShot(
+                    3000, lambda: hide_output_box_with_animation(self.window)
+                )
+                QTimer.singleShot(3300, lambda: processing(self.window, end=True))
+
+                return True
+            else:
+                # No SSID provided
+                processing(self.window, begin=True)
+                get_and_apply_styles(
+                    script_file=Path(__file__).parent,
+                    set_content_funcs={
+                        "output_box_failure.qss": self.window.output_box.setStyleSheet
+                    },
+                )
+                self.window.output_box.setPlainText(
+                    "❌ No Wi-Fi network name provided. Usage: connect [NETWORK_NAME]"
+                )
+
+                # Show and hide with animation
+                show_output_box_with_animation(self.window)
+                QTimer.singleShot(
+                    1500, lambda: hide_output_box_with_animation(self.window)
+                )
+                QTimer.singleShot(1800, lambda: processing(self.window, end=True))
+
+                return False
 
         elif command_lower in ["-h", "--help"]:
             try:

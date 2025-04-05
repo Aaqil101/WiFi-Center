@@ -152,15 +152,15 @@ class CommandProcessor:
 
         elif command.startswith("-c ") or command.startswith("connect "):
             # Extract the SSID from the command
-            parts = command.split(" ", 1)
+            parts: list[str] = command.split(" ", 1)
             if len(parts) == 2 and parts[1].strip():
-                ssid = parts[1].strip()
+                ssid: str = parts[1].strip()
 
                 # Show processing animation
                 processing(self.window, begin=True)
 
                 # Prepare to connect using the WiFiConnector
-                result = self.wifi_connector.process_input(f"connect={ssid}")
+                result: str = self.wifi_connector.process_input(f"connect={ssid}")
 
                 # Display result in output box
                 get_and_apply_styles(

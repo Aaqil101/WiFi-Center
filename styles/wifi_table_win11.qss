@@ -9,11 +9,13 @@ QTableWidget {
     padding: 4px;
     border-radius: 10px;
     border: 4px solid transparent;
+    outline: none;
 }
 
 QTableWidget::item {
     padding: 8px;
     border: none;
+    outline: none;
 }
 
 QHeaderView::section {

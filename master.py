@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 # PyQt6 Modules
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication,
@@ -19,14 +19,7 @@ from PyQt6.QtWidgets import (
 from core import CommandProcessor, TerminalAutoComplete, load_wifi_networks
 
 # Helpers Modules
-from helpers import (
-    apply_window_style,
-    center_on_screen,
-    get_and_apply_styles,
-    hide_output_box_with_animation,
-    processing,
-    show_output_box_with_animation,
-)
+from helpers import apply_window_style, center_on_screen, get_and_apply_styles
 
 
 class MasterWindow(QWidget):
@@ -47,7 +40,7 @@ class MasterWindow(QWidget):
     def initUI(self) -> None:
         # Hidden Text Box
         self.output_box = QTextEdit()
-        self.output_box.setFixedHeight(40)
+        self.output_box.setFixedHeight(60)
         self.output_box.setFixedWidth(580)
         self.output_box.setReadOnly(True)
 

@@ -24,21 +24,7 @@ body {
     color: var(--text-color);
     font-size: 16px;
     line-height: 1.65;
-    animation: gradientAnimation 10s ease infinite;
     margin: 0;
-}
-
-/* Preserved gradient animation */
-@keyframes gradientAnimation {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
 }
 
 /* Header styling (h1) - modernized */
@@ -53,7 +39,7 @@ h1 {
     color: var(--text-color);
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    border-bottom: 4px solid var(--highlight-color);
+    border-bottom: 4px solid #ff6600;
     display: inline-block;
     position: relative;
     cursor: pointer;
@@ -112,6 +98,72 @@ h3:hover {
     color: var(--accent-color);
 }
 
+/* Modern header styling (h4) */
+h4 {
+    font-size: 1.25rem;
+    font-family: "Outfit", "Montserrat", sans-serif;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-color);
+    padding: 0.25rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: var(--heading-margin-bottom);
+    border-bottom: 4px solid var(--highlight-color);
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    padding-left: 35px; /* Increased padding to accommodate arrow */
+}
+
+h4:hover {
+    transform: translateY(-1px);
+}
+
+/* Modern header styling (h5) */
+h5 {
+    font-size: 1.125rem;
+    font-family: "Outfit", "Montserrat", sans-serif;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-color);
+    padding: 0.2rem 0.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: var(--heading-margin-bottom);
+    border-left: 3px solid var(--success-color);
+    display: block;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+h5:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* Modern header styling (h6) */
+h6 {
+    font-size: 1rem;
+    font-family: "Outfit", "Montserrat", sans-serif;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-color);
+    padding: 0.15rem 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: var(--heading-margin-bottom);
+    border-left: 2px solid var(--highlight-color);
+    display: block;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+h6:hover {
+    color: var(--success-color);
+    border-color: var(--success-color);
+}
+
 /* Code styling - improved readability */
 code {
     font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
@@ -164,6 +216,23 @@ a:hover::after {
 
 a:active {
     color: #f97316;
+}
+
+/* Styled em tag */
+em {
+    font-style: italic;
+    color: var(--highlight-color);
+    background-color: rgba(245, 158, 11, 0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    display: inline-block;
+    border: 1px solid var(--highlight-color);
+}
+
+em:hover {
+    transform: translateX(2px);
 }
 
 /* Styled unordered lists */

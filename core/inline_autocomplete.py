@@ -1,4 +1,5 @@
 # Built-in Modules
+import difflib
 from typing import Literal
 
 # PyQt6 Modules
@@ -17,6 +18,13 @@ class TerminalAutoComplete(QLineEdit):
 
         self.textEdited.connect(self.show_suggestion)
         self.returnPressed.connect(self.store_history)
+
+    def fuzzy_match(self, text: str) -> list:
+        """Find the best fuzzy matches using difflib."""
+        if not text:
+            return []
+        # Get close matches with a lower cutoff for flexibility
+        return difflib.get_close_matches(text, self.commands, n=5, cutoff=0.3)
 
     def show_suggestion(self, text) -> None:
         """Update inline autocompletion when typing."""

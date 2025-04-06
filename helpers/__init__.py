@@ -1,6 +1,6 @@
 from helpers.blurWindow import Blur
 from helpers.center import center_on_screen
-from helpers.command_bar import processing
+from helpers.command_bar_enabled_state import processing
 from helpers.message_box import Buttons, Icons, MessageBox
 from helpers.output_box_animation import (
     hide_output_box_with_animation,

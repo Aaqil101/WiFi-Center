@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
             header: "Other",
             topics: [
                 { name: "Troubleshooting", file: "pages/troubleshooting.html" },
+                { name: "Architecture", file: "pages/architecture.html" },
                 { name: "Contributions", file: "pages/contributions.html" },
                 { name: "FAQ", file: "pages/faq.html" },
             ],

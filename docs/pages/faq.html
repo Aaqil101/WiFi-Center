@@ -4,24 +4,85 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/styles.css" />
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
 </head>
 
 <body>
-    <h2 id="faq">FAQ</h2>
-    <p><b>Q: How do I exit?</b></p>
-    <p>A: Click the 'X' button or press Alt+F4.</p>
+    <h1 id="faq">Frequently Asked Questions (FAQ)</h1>
 
-    <p><b>Q: Where is the settings menu?</b></p>
-    <p>A: Click on the top-right menu icon.</p>
+    <h2 id="general-usage">General Usage</h2>
+    <p><strong>Q: How do I exit the Wi-Fi Center application?</strong></p>
+    <p>A: You can click the standard 'X' button in the window's title bar, press <code>Alt+F4</code>, or type one of the
+        exit commands (<code>quit</code>, <code>exit</code>, <code>close</code>, <code>terminate</code>) into the
+        command bar and press Enter.</p>
 
-    <p><b>Q: How do I scan for networks?</b></p>
-    <p>A: Go to the Network Scanner feature and click 'Scan'.</p>
+    <p><strong>Q: How do I refresh the list of Wi-Fi networks?</strong></p>
+    <p>A: Type <code>refresh</code> into the command bar and press Enter. The background scanner also updates the list
+        automatically at regular intervals.</p>
 
-    <p><b>Q: How do I connect to a network?</b></p>
-    <p>
-        A: Select a network from the Network Scanner results and click
-        'Connect'.
+    <p><strong>Q: How do I connect to a Wi-Fi network?</strong></p>
+    <p>A: Select the desired network from the table. If it's secured, an input field will appear below the table. Enter
+        the password and click the 'Connect' button (or press Enter in the password field). Alternatively, use the
+        <code>connect <SSID> [password]</code> command in the command bar.
     </p>
+
+    <p><strong>Q: How do I disconnect from the current Wi-Fi network?</strong></p>
+    <p>A: Type <code>disconnect</code> into the command bar and press Enter.</p>
+
+    <p><strong>Q: Can I connect to hidden networks (networks that don't broadcast their SSID)?</strong></p>
+    <p>A: Currently, the application primarily lists networks detected during scans. Connecting to hidden networks might
+        require using the native Windows Wi-Fi manager (accessible via the <code>wifi-manager</code> command).</p>
+
+    <p><strong>Q: How can I see the password I'm typing?</strong></p>
+    <p>A: There should be a "Show Password" checkbox or icon next to the password input field that appears when you
+        select a secured network.</p>
+
+    <p><strong>Q: Where can I see connection status or error messages?</strong></p>
+    <p>A: Check the Output Box located directly below the command bar at the bottom of the window.</p>
+
+    <h2 id="background-scanner-faq">Background Scanner</h2>
+    <p><strong>Q: What is the icon in my system tray?</strong></p>
+    <p>A: That's the icon for the background Wi-Fi scanner process (<code>core/scanner/wifi_scanner.py</code>). It runs
+        continuously to provide network data to the main application. See the <a
+            href="advanced_features.html#background-scanner">Advanced Topics</a> page for details.</p>
+
+    <p><strong>Q: Why does the scanner run separately?</strong></p>
+    <p>A: Running the scanner as a separate background process ensures that network scanning doesn't freeze the main
+        application's user interface and allows for continuous updates.</p>
+
+    <p><strong>Q: Can I stop the background scanner?</strong></p>
+    <p>A: Yes, right-click the scanner's system tray icon and select "Exit". However, the main Wi-Fi Center application
+        will stop receiving network updates if the scanner is not running.</p>
+
+    <p><strong>Q: What information is in the <code>wifi_data.json</code> file?</strong></p>
+    <p>A: It contains a JSON list of the top 6 networks detected by the background scanner, including their SSID, signal
+        strength, whether login is required, and the last time they were seen. You can view it by right-clicking the
+        scanner's tray icon and selecting "View WiFi Data".</p>
+
+    <h2 id="commands-faq">Commands</h2>
+    <p><strong>Q: How do I know which commands are available?</strong></p>
+    <p>A: Type <code>help</code> in the command bar and press Enter. A list of commands and their descriptions will
+        appear in the output box. You can also refer to the <a href="basic_features.html#available-commands">Basic
+            Features</a> documentation.</p>
+
+    <p><strong>Q: Why do commands like <code>shutdown</code> or <code>reboot</code> require confirmation?</strong></p>
+    <p>A: These are potentially disruptive actions, so the application asks for confirmation to prevent accidental
+        system shutdowns or restarts.</p>
+
+    <p><strong>Q: Why do some commands require administrator privileges?</strong></p>
+    <p>A: Actions like scanning for networks, connecting/disconnecting, or initiating system power commands often
+        require higher permissions from the operating system for security reasons. Running the application as an
+        administrator grants these permissions.</p>
+
+    <h2 id="other-faq">Other</h2>
+    <p><strong>Q: Where is the settings menu?</strong></p>
+    <p>A: Currently, Wi-Fi Center does not have a dedicated settings menu. Configuration is primarily handled through
+        files (like stylesheets in the <code>styles/</code> directory).</p>
+
+    <p><strong>Q: How can I contribute to the project?</strong></p>
+    <p>A: Please refer to the <a href="contributions.html">Contributions</a> page for guidelines on how to contribute
+        code, report bugs, or suggest features.</p>
+
 </body>
 
 </html>

@@ -4,19 +4,122 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/styles.css" />
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
 </head>
 
 <body>
-    <h2 id="troubleshooting">Troubleshooting</h2>
-    <p>If you encounter any issues, try the following steps:</p>
+    <h1 id="troubleshooting">Troubleshooting Guide</h1>
+    <p>If you encounter problems while installing or using Wi-Fi Center, consult the common issues and solutions below.
+    </p>
+
+    <h2 id="installation-issues">Installation Issues</h2>
     <ul>
-        <li><strong>Issue:</strong> The application fails to start.</li>
-        <li><strong>Solution:</strong> Make sure you have installed all the requirements using
-            <code>pip install -r requirements.txt</code>.
+        <li>
+            <strong>Issue:</strong> Error during <code>pip install -r requirements.txt</code>, especially related to
+            Cython or NumPy.
+            <p><strong>Solution:</strong> Ensure you have Python 3.9+ and pip installed correctly. You might also need a
+                C/C++ compiler for Cython. On Windows, install the <a
+                    href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" target="_blank">Microsoft C++
+                    Build Tools</a> (select "Desktop development with C++" during installation). Try running the pip
+                install command again in an administrator terminal.</p>
         </li>
-        <li><strong>Issue:</strong> The application cannot find the Wi-Fi adapter.</li>
-        <li><strong>Solution:</strong> Make sure you have administrator privileges.</li>
+        <li>
+            <strong>Issue:</strong> Application fails to start after installation.
+            <p><strong>Solution:</strong> Double-check that all requirements were installed successfully. Ensure you are
+                running the application from the correct directory (the root `WiFi-Center` folder) using
+                <code>python master.py</code>. Check if you activated your virtual environment (if you created one).</p>
+        </li>
     </ul>
+
+    <h2 id="scanning-issues">Scanning Issues</h2>
+    <ul>
+        <li>
+            <strong>Issue:</strong> No Wi-Fi networks appear in the list, or the list doesn't update.
+            <p><strong>Solution:</strong>
+            <ol>
+                <li>Ensure your computer's Wi-Fi adapter is enabled.</li>
+                <li>Run Wi-Fi Center with administrator privileges (right-click the script or shortcut and select "Run
+                    as administrator"). Scanning often requires elevated permissions.</li>
+                <li>Check if the background scanner process (<code>core/scanner/wifi_scanner.py</code>) is running. Look
+                    for its icon in the system tray. If it's not there, try restarting the main application. If it is
+                    there, right-click it, select "Show Console", and check the logs for errors.</li>
+                <li>Try the <code>refresh</code> command in the command bar.</li>
+                <li>Ensure no other application is exclusively controlling the Wi-Fi adapter.</li>
+            </ol>
+            </p>
+        </li>
+        <li>
+            <strong>Issue:</strong> The background scanner (system tray icon) is not running or crashes.
+            <p><strong>Solution:</strong>
+            <ol>
+                <li>Try running <code>python core/scanner/wifi_scanner.py</code> directly from the terminal (with
+                    administrator privileges) to see if any errors are printed.</li>
+                <li>Check if another instance is already running (the scanner prevents multiple instances). You might
+                    need to use Task Manager to find and terminate existing `python.exe` or `WiFi-Scanner.exe` processes
+                    related to this application.</li>
+                <li>Ensure all dependencies from <code>requirements.txt</code> are installed correctly.</li>
+            </ol>
+            </p>
+        </li>
+        <li>
+            <strong>Issue:</strong> Scan results seem outdated or slow.
+            <p><strong>Solution:</strong> The background scanner runs at a set interval (default 0.5 seconds). You can
+                force an immediate scan using the <code>refresh</code> command in the main app or the "Force Scan Now"
+                button in the scanner console. Check the scanner console logs for any performance warnings or errors.
+            </p>
+        </li>
+    </ul>
+
+    <h2 id="connection-issues">Connection Issues</h2>
+    <ul>
+        <li>
+            <strong>Issue:</strong> Cannot connect to a network (e.g., "Connection Failed" message).
+            <p><strong>Solution:</strong>
+            <ol>
+                <li>Double-check that you entered the correct password. Passwords are case-sensitive.</li>
+                <li>Ensure you have selected the correct network (SSID).</li>
+                <li>Try connecting using the native Windows Wi-Fi manager (use the <code>wifi-manager</code> command) to
+                    see if the issue is specific to Wi-Fi Center.</li>
+                <li>Run Wi-Fi Center with administrator privileges, as connecting sometimes requires them.</li>
+                <li>Check the signal strength. Weak signals can cause connection failures.</li>
+                <li>Restart your Wi-Fi router and your computer.</li>
+            </ol>
+            </p>
+        </li>
+        <li>
+            <strong>Issue:</strong> Application freezes when trying to connect.
+            <p><strong>Solution:</strong> This might indicate an issue with the underlying `pywifi` library or system
+                interaction. Try restarting the application (with administrator privileges). If the problem persists,
+                check the project's GitHub issues page or consider reporting it.</p>
+        </li>
+    </ul>
+
+    <h2 id="general-issues">General Issues</h2>
+    <ul>
+        <li>
+            <strong>Issue:</strong> Command bar commands don't work (e.g., <code>shutdown</code>, <code>reboot</code>).
+            <p><strong>Solution:</strong> These commands often require administrator privileges. Ensure you are running
+                Wi-Fi Center as an administrator.</p>
+        </li>
+        <li>
+            <strong>Issue:</strong> UI elements look strange or misaligned.
+            <p><strong>Solution:</strong> This could be related to screen scaling settings in Windows or specific theme
+                files. Check the <code>styles/</code> directory and the OS-specific QSS files (<code>win10.qss</code>,
+                <code>win11.qss</code>). You might need to adjust your display settings.</p>
+        </li>
+    </ul>
+
+    <h2 id="getting-more-help">Getting More Help</h2>
+    <p>If your issue is not listed here:</p>
+    <ul>
+        <li>Check the Scanner Console logs for detailed error messages (Right-click tray icon -> Show Console).</li>
+        <li>Consult the <a href="faq.html">FAQ page</a>.</li>
+        <li>Check the <a href="https://github.com/Aaqil101/WiFi-Center/issues" target="_blank">GitHub Issues page</a>
+            for existing reports or create a new one.</li>
+        <li>Contact support via the details on the <a href="introduction.html#contact-support">Introduction page</a>.
+        </li>
+    </ul>
+
 </body>
 
 </html>

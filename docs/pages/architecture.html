@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
+</head>
+
+<body>
+    <h1 id="project-architecture">Project Architecture</h1>
+    <p>
+        This page provides a high-level overview of the structure and
+        components of the Wi-Fi Center application.
+    </p>
+
+    <h2 id="directory-structure">Key Directories and Files</h2>
+    <ul>
+        <li>
+            <strong><code>master.py</code>:</strong> The main entry point of
+            the application. It initializes the PyQt6 application, sets up
+            the main window, and integrates various components.
+        </li>
+        <li>
+            <strong><code>core/</code>:</strong> Contains the core logic for
+            Wi-Fi operations and application features.
+            <ul>
+                <li>
+                    <code>available_networks.py</code>: Manages the display
+                    and interaction with the list of scanned networks.
+                </li>
+                <li>
+                    <code>command_processor.py</code>: Handles parsing and
+                    execution of commands entered in the command bar.
+                </li>
+                <li>
+                    <code>inline_autocomplete.py</code>: Implements the
+                    autocompletion feature for the command bar.
+                </li>
+                <li>
+                    <code>wifi_connect.py</code> /
+                    <code>wifi_disconnect.py</code> /
+                    <code>wifi_networks.py</code>: Modules likely handling
+                    the specifics of connecting, disconnecting, and managing
+                    network profiles using the underlying Wi-Fi library
+                    (e.g., `pywifi`).
+                </li>
+                <li>
+                    <code>scanner/</code>: Contains the separate background
+                    Wi-Fi scanner application (see
+                    <a href="advanced_features.html#background-scanner">Advanced Topics</a>).
+                    <ul>
+                        <li>
+                            <code>wifi_scanner.py</code>: Main script for
+                            the background scanner tray application.
+                        </li>
+                        <li>
+                            <code>wifi_scanner_cy.pyx</code>: Cython source
+                            file for optimized scanning logic.
+                        </li>
+                        <li>
+                            <code>setup.py</code>: Used to build the Cython
+                            extension.
+                        </li>
+                        <li>
+                            <code>build_executable.ps1</code>: Script to
+                            build a standalone `.exe` of the scanner using
+                            PyInstaller (optional).
+                        </li>
+                        <li>
+                            <code>wifi_data.json</code>: Output file where
+                            the scanner writes detected network data.
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <strong><code>helpers/</code>:</strong> Contains utility modules
+            used across the application.
+            <ul>
+                <li>
+                    <code>command_bar.py</code>: Defines the custom command
+                    bar widget.
+                </li>
+                <li>
+                    <code>output_box_animation.py</code>: Defines the
+                    animated output box widget.
+                </li>
+                <li>
+                    <code>center.py</code>, <code>message_box.py</code>,
+                    <code>path_utils.py</code>,
+                    <code>system_commands.py</code>,
+                    <code>win_style_helper.py</code>,
+                    <code>blurWindow.py</code>: Various helper functions for
+                    UI centering, message dialogs, path manipulation,
+                    executing system commands, applying Windows styles, and
+                    window blur effects.
+                </li>
+            </ul>
+        </li>
+        <li>
+            <strong><code>docs/</code>:</strong> Contains the documentation
+            source files and the documentation viewer application.
+            <ul>
+                <li>
+                    <code>docs_app.py</code>: The PyQt6 application that
+                    displays this documentation.
+                </li>
+                <li>
+                    <code>index.html</code>: The main HTML file for the
+                    documentation viewer interface.
+                </li>
+                <li>
+                    <code>pages/</code>: Contains the individual HTML
+                    documentation pages (like this one).
+                </li>
+                <li>
+                    <code>assets/</code>: CSS, JavaScript, and icons for the
+                    documentation viewer.
+                </li>
+            </ul>
+        </li>
+        <li>
+            <strong><code>styles/</code>:</strong> Contains Qt Style Sheet
+            (QSS) files for theming the main application UI.
+        </li>
+        <li>
+            <strong><code>assets/</code>:</strong> Contains icons and other
+            graphical assets for the main application UI.
+        </li>
+        <li>
+            <strong><code>requirements.txt</code>:</strong> Lists the Python
+            dependencies required to run the project.
+        </li>
+    </ul>
+
+    <h2 id="component-interaction">Component Interaction (Simplified)</h2>
+    <p>
+        The following diagram illustrates the basic flow of information and
+        interaction between key components:
+    </p>
+    <img src="../assets/images/architecture_diagram_v01.svg" alt="Architecture Diagram"
+        style="max-width: 100%; height: auto;">
+    <p>
+        <em>Note: This is a simplified representation. Actual interactions
+            might be more complex.</em>
+    </p>
+</body>
+
+</html>
+<script src="../assets/js/foldable.js"></script>

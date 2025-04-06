@@ -4,32 +4,92 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/styles.css" />
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
 </head>
 
 <body>
-    <h2 id="advanced-features">Advanced Features</h2>
-    <p>The application does not currently have any advanced features. This section will be updated in the future to
-        include information about the application's advanced features.</p>
+    <h1 id="advanced-topics">Advanced Topics</h1>
 
-    <h2 id="wifi-networks">Wi-Fi Networks</h2>
-    <p>The application displays a list of available Wi-Fi networks and their signal strengths in a table.</p>
+    <h2 id="background-scanner">Background Wi-Fi Scanner (<code>core/scanner/</code>)</h2>
+    <p>
+        Wi-Fi Center utilizes a separate background process for continuous network scanning, located in the
+        <code>core/scanner/</code> directory. This process runs independently and provides network data to the main
+        application.
+    </p>
 
-    <h3 id="features">Features</h3>
+    <h3 id="scanner-purpose">Purpose and Functionality</h3>
     <ul>
-        <li>Scans and displays available Wi-Fi networks.</li>
-        <li>Displays the signal strength of each network.</li>
-        <li>Allows the user to connect to a selected network.</li>
+        <li><strong>Continuous Scanning:</strong> Runs constantly in the background (default interval: 0.5 seconds) to
+            detect nearby Wi-Fi networks.</li>
+        <li><strong>Data Output:</strong> Saves the top 6 detected networks (based on signal strength) along with their
+            SSID, signal strength (%), whether login is required, and the last seen timestamp to a JSON file:
+            <code>core/scanner/wifi_data.json</code>. The main Wi-Fi Center application reads this file to populate its
+            network list.</li>
+        <li><strong>Cython Optimization:</strong> Uses a pre-compiled Cython module (<code>wifi_scanner_cy.pyd</code>
+            built from <code>wifi_scanner_cy.pyx</code>) for faster scanning performance if available. Falls back to a
+            pure Python implementation otherwise.</li>
+        <li><strong>Single Instance:</strong> Ensures only one instance of the scanner process runs at a time.</li>
     </ul>
 
-    <h2 id="configuration">Configuration</h2>
-    <p>The application's configuration is managed through the following files:</p>
+    <h3 id="scanner-interaction">Interaction via System Tray</h3>
+    <p>
+        The background scanner runs as a system tray application with its own icon. Right-clicking the tray icon
+        provides the following options:
+    </p>
+    <ul>
+        <li><strong>Show Console:</strong> Opens the Scanner Console window.</li>
+        <li><strong>View WiFi Data:</strong> Opens the <code>wifi_data.json</code> file in the default application
+            (e.g., Notepad).</li>
+        <li><strong>Exit:</strong> Stops the background scanner process. Note that the main Wi-Fi Center application
+            will stop receiving network updates if the scanner is exited.</li>
+    </ul>
+    <p>Double-clicking the tray icon also opens the Scanner Console.</p>
 
-    <h3 id="styles">Styles</h3>
-    <p>The application's styles are defined in the <code>styles/</code> directory. These styles are applied to the
-        application's UI elements.</p>
+    <h3 id="scanner-console">Scanner Console Window</h3>
+    <p>
+        The "WiFi Scanner Console" window provides insights into the scanner's operation:
+    </p>
+    <ul>
+        <li><strong>Log Display:</strong> Shows real-time logs, including scan events, errors, and status messages
+            (e.g., Cython optimization status).</li>
+        <li><strong>Last Scan Time:</strong> Displays the timestamp of the most recent scan.</li>
+        <li><strong>Optimization Status:</strong> Indicates whether the Cython-optimized scanning is enabled.</li>
+        <li><strong>Clear Log Button:</strong> Clears the log display area.</li>
+        <li><strong>Force Scan Now Button:</strong> Manually triggers an immediate network scan.</li>
+    </ul>
+    <p>Closing the console window only hides it; the scanner continues running in the background. Use the "Exit" option
+        in the tray menu to stop it completely.</p>
 
-    <h3 id="assets">Assets</h3>
-    <p>The application's assets, such as icons and images, are stored in the <code>assets/</code> directory.</p>
+    <h2 id="theming-styling">Theming and Styling</h2>
+    <p>
+        The visual appearance of both the main Wi-Fi Center application and the Scanner Console can be customized using
+        Qt Style Sheets (QSS).
+    </p>
+    <ul>
+        <li><strong>Main Application Styles:</strong> QSS files located in the main <code>styles/</code> directory
+            control the look of the main window, buttons, table, command bar, etc. Specific files like
+            <code>win10.qss</code> and <code>win11.qss</code> apply base styles depending on the operating system.</li>
+        <li><strong>Scanner Console Styles:</strong> QSS files in <code>core/scanner/styles/</code> control the
+            appearance of the scanner's console window elements (log display, buttons, labels). It also uses
+            <code>win10.qss</code> and <code>win11.qss</code> for OS-specific base styling, including blur effects on
+            Windows 11.</li>
+    </ul>
+    <p>You can modify these QSS files to change colors, fonts, borders, and other visual aspects.</p>
+
+    <h2 id="assets">Assets</h2>
+    <p>
+        Graphical assets used by the application are stored in the respective <code>assets/</code> directories:
+    </p>
+    <ul>
+        <li><strong>Main Application Assets (<code>assets/</code>):</strong> Contains icons used in the main Wi-Fi
+            Center window (e.g., <code>master_icon.png</code>, <code>connect_to_wifi_icon.png</code>).</li>
+        <li><strong>Scanner Assets (<code>core/scanner/assets/</code>):</strong> Contains icons specifically for the
+            background scanner, such as the tray icon (<code>wifi_scanner_tray_icon.png</code>) and the console window
+            icon (<code>wifi_scanner_window_icon.png</code>).</li>
+        <li><strong>Documentation Assets (<code>docs/assets/</code>):</strong> Contains CSS, JavaScript, and icons used
+            for rendering this documentation viewer.</li>
+    </ul>
+
 </body>
 
 </html>

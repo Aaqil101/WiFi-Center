@@ -3,31 +3,81 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
 </head>
 
 <body>
-    <h1>Installation Guide</h1>
+    <h1 id="installation-guide">Installation Guide</h1>
     <p>
         Welcome to the installation guide! This guide will help you set up the application on your system. Follow the
         steps below to install the application successfully.
     </p>
-    <h3>System Requirements</h3>
+    <h3 id="system-requirements">System Requirements</h3>
     <ul>
-        <li>Windows 10 or newer</li>
-        <li>Python 3.9+ installed</li>
-        <li>Administrator privileges for WiFi operations</li>
+        <li>Operating System: Windows 10 or newer</li>
+        <li>Python: Version 3.9 or higher installed and added to your system's PATH.</li>
+        <li>Dependencies: Requires packages listed in <code>requirements.txt</code>, including PyQt6, Cython, and NumPy.
+        </li>
+        <li>Privileges: Administrator privileges are required for certain Wi-Fi operations like scanning and
+            connecting/disconnecting networks. The application may prompt for elevation if needed.</li>
     </ul>
 
-    <h3>Installation Steps</h3>
+    <h3 id="installation-steps">Installation Steps (Running from Source)</h3>
     <ol>
-        <li>Clone the repository</li>
-        <li>Navigate to the project directory: <code>cd WiFi-Center</code></li>
-        <li>Install requirements: <code>pip install -r requirements.txt</code></li>
-        <li>Run <code>master.py</code> to start the application: <code>python master.py</code></li>
+        <li>
+            <strong>Clone the Repository:</strong> Open a terminal or command prompt and clone the project repository
+            from GitHub:
+            <pre><code>git clone https://github.com/Aaqil101/WiFi-Center.git</code></pre>
+        </li>
+        <li>
+            <strong>Navigate to Project Directory:</strong> Change your current directory to the cloned project folder:
+            <pre><code>cd WiFi-Center</code></pre>
+        </li>
+        <li>
+            <strong>(Optional but Recommended) Create a Virtual Environment:</strong> To avoid conflicts with other
+            Python projects, it's best to create and activate a virtual environment:
+            <pre><code>python -m venv .venv
+# On Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+# On Windows Command Prompt (cmd.exe):
+.\.venv\Scripts\activate.bat
+# On macOS/Linux:
+source .venv/bin/activate</code></pre>
+        </li>
+        <li>
+            <strong>Install Requirements:</strong> Install all necessary dependencies using pip. This step will also
+            compile the Cython extension (`core/scanner/wifi_scanner_cy.pyx`) needed for efficient network scanning:
+            <pre><code>pip install -r requirements.txt</code></pre>
+            <em>Note: This may take a few moments as it downloads packages and compiles the Cython code. Ensure you have
+                a C/C++ compiler installed if you encounter issues during this step (e.g., Microsoft C++ Build Tools on
+                Windows).</em>
+        </li>
+        <li>
+            <strong>Run the Application:</strong> Start the main application by running the <code>master.py</code>
+            script:
+            <pre><code>python master.py</code></pre>
+            <em>Remember to run this command with administrator privileges if you encounter issues with Wi-Fi scanning
+                or connection management.</em>
+        </li>
     </ol>
 
-    <button onclick="location.href='troubleshooting.html'" class="btn">Troubleshooting</button>
+    <h3 id="building-standalone-scanner-optional">Building Standalone Scanner (Optional)</h3>
+    <p>
+        The project includes a separate, optimized Wi-Fi scanner component in the <code>core/scanner/</code> directory.
+        While the main application uses its compiled Cython version, you can also build a standalone
+        <code>WiFi-Scanner.exe</code> using PyInstaller. This is generally intended for development or distribution
+        purposes.
+    </p>
+    <p>
+        To build it, navigate to the <code>core/scanner/</code> directory and run the provided PowerShell script:
+    </p>
+    <pre><code>cd core/scanner
+powershell -ExecutionPolicy Bypass -File .\build_executable.ps1</code></pre>
+    <p>This script handles setting up a virtual environment (if needed), running PyInstaller, and placing the final
+        <code>WiFi-Scanner.exe</code> in the <code>core/scanner/</code> directory.</p>
+
+    <button onclick="location.href='troubleshooting.html'" class="btn">Troubleshooting Installation</button>
 </body>
 
 </html>

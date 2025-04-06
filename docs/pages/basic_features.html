@@ -4,77 +4,157 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/styles.css" />
+    <style>
+        a {
+            color: #10b981;
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/scrollbar.css" />
 </head>
 
 <body>
-    <h2 id="basic-features">Basic Features</h2>
+    <h1 id="basic-features">Basic Features</h1>
     <p>The application includes the following basic features:</p>
     <ul>
         <li>
-            <b> Network Scanner:</b> Scan and display available WiFi
-            networks.
-            <p>The application automatically scans for available Wi-Fi networks and displays them in a table. The
-                table shows the network name and the signal strength.</p>
+            <strong id="network-scanner">Network Scanner:</strong> Scans and displays available Wi-Fi networks.
+            <p>
+                When the application starts, it automatically launches a background process called <strong>"WiFi
+                    Scanner"</strong>. This
+                process continuously scans for nearby Wi-Fi networks and updates a JSON file with the latest results.
+                The scanned networks are displayed in a table, showing the network name (SSID) and signal strength in
+                real-time. Users can also manually trigger a new scan by using the
+                <code>-r <strong>|</strong> refresh</code> command for updated results.
+            </p>
         </li>
         <li>
-            <b> Connection Manager:</b> Connect to and manage WiFi networks.
-            <p>To connect to a Wi-Fi network, select the network from the table and enter the password. The
-                application will then connect to the network.</p>
+            <strong id="connection-manager">Connection Manager:</strong> Connects to and manages Wi-Fi networks.
+            <p>To connect to a network, select it from the table. If the network requires a password, an input field
+                will appear. Enter the password and click the 'Connect' button or press Enter. Connection status
+                (success or failure) will be shown in the Output Box below the command bar. You can also connect using
+                the <code>connect "Network Name"</code> command.</p>
         </li>
         <li>
-            <b> Command Bar:</b> Execute commands to manage the application.
-            <p>The command bar allows you to enter commands to perform various actions, such as disconnecting from the
-                current network, refreshing the list of networks, shutting down the system, rebooting the system, etc.
-                Type <code>help</code> to see a list of available commands.</p>
+            <strong id="command-bar">Command Bar:</strong> Executes commands for various actions.
+            <p>Located at the bottom of the window, the command bar allows you to type commands for quick actions like
+                refreshing the network list, disconnecting, managing system power states, or getting help. It features
+                autocompletion to assist you.</p>
         </li>
-        <li><b> Help:</b> Access this help guide for assistance.
-            <p>This help guide provides detailed instructions on how to use the application.</p>
+        <li><strong id="help-guide">Help Guide:</strong> Accesses this documentation.
+            <p>Provides detailed instructions and information about using the application.</p>
+        </li>
+        <li>
+            <strong id="terminal-autocomplete">Command Autocompletion:</strong> Suggests matching commands as you type.
+            <p>Implemented in
+                <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/inline_autocomplete.py">core/inline_autocomplete.py</a></code>,
+                the command bar provides
+                autocompletion. Press the <code>Tab</code> key to complete the suggested command.
+            </p>
         </li>
     </ul>
 
-    <h2 id="command-processor">Command Processor</h2>
-    <p>The <code>CommandProcessor</code> class handles the processing of user input and the execution of commands.</p>
+    <h2 id="command-processor">Command Processor Details</h2>
+    <p>The application uses a
+        <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/command_processor.py">CommandProcessor</a></code>
+        to
+        interpret and execute commands entered into the command bar.
+    </p>
 
-    <h3 id="commands">Commands</h3>
+    <h4 id="available-commands">Available Commands</h4>
+    <p>The following commands are available in the command bar. Type the command and press Enter.</p>
     <ul>
-        <li><code>quit</code>, <code>exit</code>, <code>close</code>, <code>terminate</code>: Quits the application.
+        <li>
+            <code>quit <strong>|</strong> exit <strong>|</strong> close <strong>|</strong> terminate</code> ➜ Closes the
+            Wi-Fi Center application.
         </li>
-        <li><code>disconnect</code>: Disconnects from the current network.</li>
-        <li><code>refresh</code>: Refreshes the list of networks.</li>
-        <li><code>shutdown</code>: Shuts down the system.</li>
-        <li><code>reboot</code>, <code>restart</code>: Reboots the system.</li>
-        <li><code>sleep</code>: Puts the system to sleep.</li>
-        <li><code>hibernate</code>: Hibernates the system.</li>
-        <li><code>lock</code>, <code>logout</code>: Locks the system or logs out the current user.</li>
-        <li><code>wifi-manager</code>: Opens the Wi-Fi manager.</li>
-        <li><code>connect</code>: Connects to a specified network.</li>
-        <li><code>help</code>: Displays a list of available commands.</li>
+        <li>
+            <code>-d <strong>|</strong> disconnect</code> ➜ Disconnects from the currently connected Wi-Fi network.
+        </li>
+        <li>
+            <code>-w <strong>|</strong> wifi-manager</code> ➜ Opens the native Windows Wi-Fi settings panel.
+        </li>
+        <li>
+            <code>connect &lt;SSID&gt; <strong>|</strong> Network Name</code> ➜ Attempts to connect to the specified
+            network SSID or
+            name. If the
+            network is
+            secured, a password dialog will appear for you to enter the required credentials.
+        </li>
+        <li>
+            <em>Note: If the SSID contains spaces, enclose it in double quotes. Example:
+                <code>connect "My Network"</code></em>
+        </li>
+        <li>
+            <code>-r <strong>|</strong> refresh</code> ➜ Initiates a new scan for available Wi-Fi networks and updates
+            the list.
+        </li>
+        <li>
+            <code>shutdown</code> ➜ Initiates a system shutdown (requires confirmation).
+        </li>
+        <li>
+            <code>reboot <strong>|</strong> restart</code> ➜ Initiates a system reboot (requires confirmation).
+        </li>
+        <li>
+            <code>sleep</code> ➜ Puts the system into sleep mode.
+        </li>
+        <li>
+            <code>hibernate</code> ➜ Puts the system into hibernation mode (if supported).
+        </li>
+        <li>
+            <code>lock <strong>|</strong> logout</code> ➜ Locks the workstation or logs out the current user.
+        </li>
+        <li>
+            <code>-h <strong>|</strong> --help</code> ➜ Displays a summary of available commands in the output box.
+        </li>
+        <li>
+            <em>Note: You can combine multiple commands using the <code>&amp;&amp;</code> operator. For example, to
+                refresh
+                the network list and then connect to a network, you can use:
+                <code>refresh && connect "My Network"</code>.</em>
+        </li>
     </ul>
 
-    <h2 id="terminal-autocomplete">Terminal AutoComplete</h2>
-    <p>The <code>TerminalAutoComplete</code> class provides auto-completion functionality for the command bar.</p>
-    <p>It extends the <code>QLineEdit</code> widget and suggests commands as the user types, Cycles through suggestions
-        using the Tab key.</p>
-
-    <h2 id="ui-elements">UI Elements</h2>
+    <h2 id="ui-elements">Key UI Elements</h2>
     <p>The application's user interface consists of the following elements:</p>
 
     <ul>
         <li>
-            <b> Main Window:</b>
-            <p>The main window displays the list of available Wi-Fi networks and the command bar.</p>
+            <a href="https://github.com/Aaqil101/WiFi-Center/blob/master/master.py">
+                <strong>Main Window</strong>
+            </a> ➜
+            The primary application window containing all other
+            elements.
         </li>
         <li>
-            <b> Network Table:</b>
-            <p>The network table displays the list of available Wi-Fi networks and their signal strengths.</p>
+            <a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_networks.py">
+                <strong>Network Table</strong>
+            </a> ➜
+            Displays the list of scanned Wi-Fi
+            networks (SSID, signal strength). Allows selection for connection.
         </li>
         <li>
-            <b> Command Bar:</b>
-            <p>The command bar allows the user to enter commands to perform various actions.</p>
+            <a
+                href="https://github.com/Aaqil101/WiFi-Center/blob/4817ce6dfb739252ec58e12291ff9d3eda6c9981/master.py#L62">
+                <strong>Command Bar</strong>
+            </a> ➜
+            The command bar allows users to input commands for various actions, such as connecting to networks or
+            refreshing the network list.
         </li>
         <li>
-            <b> Output Box:</b>
-            <p>The output box displays messages to the user.</p>
+            <a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/output_box_animation.py">
+                <strong>Output Box:</strong>
+            </a> ➜
+            Area below the command bar that
+            displays status messages, command output, connection results, and error messages, <strong>hidden by
+                default</strong>.
+        </li>
+        <li>
+            <a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_connect.py">
+                <strong>Password Input</strong>
+            </a> ➜
+            Appears dynamically when connecting to a secured network. Allows users to
+            enter the
+            network password. Includes a "Show Password" checkbox for visibility.
         </li>
     </ul>
 </body>

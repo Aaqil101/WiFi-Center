@@ -5,6 +5,11 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/styles.css" />
     <link rel="stylesheet" href="../assets/css/scrollbar.css" />
+    <style>
+        a {
+            color: #10b981;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,53 +22,66 @@
     <h2 id="directory-structure">Key Directories and Files</h2>
     <ul>
         <li>
-            <strong><code>master.py</code>:</strong> The main entry point of
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/master.py">master.py</a></code>:</strong>
+            The main
+            entry point of
             the application. It initializes the PyQt6 application, sets up
             the main window, and integrates various components.
         </li>
         <li>
-            <strong><code>core/</code>:</strong> Contains the core logic for
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/core">core/</a></code>:</strong>
+            Contains the core logic for
             Wi-Fi operations and application features.
             <ul>
                 <li>
-                    <code>available_networks.py</code>: Manages the display
-                    and interaction with the list of scanned networks.
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/available_networks.py">available_networks.py</a></code>:
+                    Opens the Wi-Fi manager using the specified terminal.
                 </li>
                 <li>
-                    <code>command_processor.py</code>: Handles parsing and
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/command_processor.py">command_processor.py</a></code>:
+                    Handles parsing and
                     execution of commands entered in the command bar.
                 </li>
                 <li>
-                    <code>inline_autocomplete.py</code>: Implements the
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/inline_autocomplete.py">inline_autocomplete.py</a></code>:
+                    Implements the
                     autocompletion feature for the command bar.
                 </li>
                 <li>
-                    <code>wifi_connect.py</code> /
-                    <code>wifi_disconnect.py</code> /
-                    <code>wifi_networks.py</code>: Modules likely handling
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/core/wifi_connect.py">wifi_connect.py</a></code>
+                    /
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_disconnect.py">wifi_disconnect.py</a></code>
+                    /
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_networks.py">wifi_networks.py</a></code>:
+                    Modules likely handling
                     the specifics of connecting, disconnecting, and managing
                     network profiles using the underlying Wi-Fi library
                     (e.g., `pywifi`).
                 </li>
                 <li>
-                    <code>scanner/</code>: Contains the separate background
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/core/scanner">scanner/</a></code>:
+                    Contains the separate background
                     Wi-Fi scanner application (see
                     <a href="advanced_features.html#background-scanner">Advanced Topics</a>).
                     <ul>
                         <li>
-                            <code>wifi_scanner.py</code>: Main script for
+                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/wifi_scanner.py">wifi_scanner.py</a></code>:
+                            Main script for
                             the background scanner tray application.
                         </li>
                         <li>
-                            <code>wifi_scanner_cy.pyx</code>: Cython source
+                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/wifi_scanner_cy.pyx">wifi_scanner_cy.pyx</a></code>:
+                            Cython source
                             file for optimized scanning logic.
                         </li>
                         <li>
-                            <code>setup.py</code>: Used to build the Cython
+                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/setup.py">setup.py</a></code>:
+                            Used to build the Cython
                             extension.
                         </li>
                         <li>
-                            <code>build_executable.ps1</code>: Script to
+                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/build_executable.ps1">build_executable.ps1</a></code>:
+                            Script to
                             build a standalone `.exe` of the scanner using
                             PyInstaller (optional).
                         </li>
@@ -76,23 +94,27 @@
             </ul>
         </li>
         <li>
-            <strong><code>helpers/</code>:</strong> Contains utility modules
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers">helpers/</a></code>:</strong>
+            Contains utility modules
             used across the application.
             <ul>
                 <li>
-                    <code>command_bar.py</code>: Defines the custom command
-                    bar widget.
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/command_bar_enabled_state.py">command_bar_enabled_state.py</a></code>:
+                    Helper function to control the command bar's enabled state.
                 </li>
                 <li>
-                    <code>output_box_animation.py</code>: Defines the
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/output_box_animation.py">output_box_animation.py</a></code>:
+                    Defines the
                     animated output box widget.
                 </li>
                 <li>
-                    <code>center.py</code>, <code>message_box.py</code>,
-                    <code>path_utils.py</code>,
-                    <code>system_commands.py</code>,
-                    <code>win_style_helper.py</code>,
-                    <code>blurWindow.py</code>: Various helper functions for
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/center.py">center.py</a></code>,
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/message_box.py">message_box.py</a></code>,
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/path_utils.py">path_utils.py</a></code>,
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/system_commands.py">system_commands.py</a></code>,
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/win_style_helper.py">win_style_helper.py</a></code>,
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/helpers/blurWindow.py">blurWindow.py</a></code>:
+                    Various helper functions for
                     UI centering, message dialogs, path manipulation,
                     executing system commands, applying Windows styles, and
                     window blur effects.
@@ -100,37 +122,46 @@
             </ul>
         </li>
         <li>
-            <strong><code>docs/</code>:</strong> Contains the documentation
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/docs">docs/</a></code>:</strong>
+            Contains the documentation
             source files and the documentation viewer application.
             <ul>
                 <li>
-                    <code>docs_app.py</code>: The PyQt6 application that
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/docs/docs_app.py">docs_app.py</a></code>:
+                    The PyQt6 application that
                     displays this documentation.
                 </li>
                 <li>
-                    <code>index.html</code>: The main HTML file for the
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/docs/index.html">index.html</a></code>:
+                    The main HTML file for the
                     documentation viewer interface.
                 </li>
                 <li>
-                    <code>pages/</code>: Contains the individual HTML
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/docs/pages">pages/</a></code>:
+                    Contains
+                    the individual HTML
                     documentation pages (like this one).
                 </li>
                 <li>
-                    <code>assets/</code>: CSS, JavaScript, and icons for the
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/docs/assets">assets/</a></code>:
+                    CSS, JavaScript, images, and icons for the
                     documentation viewer.
                 </li>
             </ul>
         </li>
         <li>
-            <strong><code>styles/</code>:</strong> Contains Qt Style Sheet
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/styles">styles/</a></code>:</strong>
+            Contains Qt Style Sheet
             (QSS) files for theming the main application UI.
         </li>
         <li>
-            <strong><code>assets/</code>:</strong> Contains icons and other
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/assets">assets/</a></code>:</strong>
+            Contains icons and other
             graphical assets for the main application UI.
         </li>
         <li>
-            <strong><code>requirements.txt</code>:</strong> Lists the Python
+            <strong><code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/requirements.txt">requirements.txt</a></code>:</strong>
+            Lists the Python
             dependencies required to run the project.
         </li>
     </ul>
@@ -140,7 +171,7 @@
         The following diagram illustrates the basic flow of information and
         interaction between key components:
     </p>
-    <img src="../assets/images/architecture_diagram_v01.svg" alt="Architecture Diagram"
+    <img src="../assets/images/architecture_diagram_v02.svg" alt="Architecture Diagram"
         style="max-width: 100%; height: auto;">
     <p>
         <em>Note: This is a simplified representation. Actual interactions

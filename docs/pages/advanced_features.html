@@ -24,7 +24,8 @@
         <li><strong>Data Output:</strong> Saves the top 6 detected networks (based on signal strength) along with their
             SSID, signal strength (%), whether login is required, and the last seen timestamp to a JSON file:
             <code>core/scanner/wifi_data.json</code>. The main Wi-Fi Center application reads this file to populate its
-            network list.</li>
+            network list.
+        </li>
         <li><strong>Cython Optimization:</strong> Uses a pre-compiled Cython module (<code>wifi_scanner_cy.pyd</code>
             built from <code>wifi_scanner_cy.pyx</code>) for faster scanning performance if available. Falls back to a
             pure Python implementation otherwise.</li>
@@ -68,11 +69,13 @@
     <ul>
         <li><strong>Main Application Styles:</strong> QSS files located in the main <code>styles/</code> directory
             control the look of the main window, buttons, table, command bar, etc. Specific files like
-            <code>win10.qss</code> and <code>win11.qss</code> apply base styles depending on the operating system.</li>
+            <code>win10.qss</code> and <code>win11.qss</code> apply base styles depending on the operating system.
+        </li>
         <li><strong>Scanner Console Styles:</strong> QSS files in <code>core/scanner/styles/</code> control the
             appearance of the scanner's console window elements (log display, buttons, labels). It also uses
             <code>win10.qss</code> and <code>win11.qss</code> for OS-specific base styling, including blur effects on
-            Windows 11.</li>
+            Windows 11.
+        </li>
     </ul>
     <p>You can modify these QSS files to change colors, fonts, borders, and other visual aspects.</p>
 

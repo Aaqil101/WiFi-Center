@@ -35,9 +35,21 @@
     <div role="region" aria-label="How to Use Steps">
         <ol>
             <li>Open the application.</li>
-            <li>Select a Wi-Fi network.</li>
-            <li>Use <code>connect &lt;SSID&gt; <strong>|</strong> c &lt;SSID&gt;</code> to connect to the network. If
-                the network is secured, a password dialog will appear for you to enter the required credentials.</li>
+            <li>
+                Use <code>connect &lt;SSID&gt; <strong>|</strong> c &lt;SSID&gt;</code> to connect to the network. If
+                the network is secured, a password dialog will appear for you to enter the required credentials.
+            </li>
+            <li>
+                Take a look at the <a href="./basic_features.html#available-commands">commands section</a> in the basic
+                features
+                page to see the available commands you can use in the command bar.
+            </li>
+            <li>
+                <em>Note: You can combine multiple commands using the <code>&amp;&amp;</code> operator. For example, to
+                    refresh
+                    the network list and then connect to a network, you can use:
+                    <code>refresh && connect "My Network"</code>.</em>
+            </li>
         </ol>
     </div>
 

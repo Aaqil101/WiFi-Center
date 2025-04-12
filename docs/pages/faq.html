@@ -9,6 +9,11 @@
 
 <body>
     <h1 id="faq">Frequently Asked Questions (FAQ)</h1>
+    <p>This page contains answers to common questions about the Wi-Fi Center application. If you have a question that is
+        not answered here, please check the <a href="contributions.html">Contributions</a> page for information on how
+        to
+        ask for help or report issues.
+    </p>
 
     <h2 id="general-usage">General Usage</h2>
     <p><strong>Q: How do I exit the Wi-Fi Center application?</strong></p>
@@ -17,21 +22,25 @@
         command bar and press Enter.</p>
 
     <p><strong>Q: How do I refresh the list of Wi-Fi networks?</strong></p>
-    <p>A: Type <code>refresh</code> into the command bar and press Enter. The background scanner also updates the list
+    <p>A: Type <code>-r <strong>|</strong> refresh</code> into the command bar and press Enter. The background scanner
+        also updates the list
         automatically at regular intervals.</p>
 
     <p><strong>Q: How do I connect to a Wi-Fi network?</strong></p>
-    <p>A: Select the desired network from the table. If it's secured, an input field will appear below the table. Enter
-        the password and click the 'Connect' button (or press Enter in the password field). Alternatively, use the
-        <code>connect <SSID> [password]</code> command in the command bar.
+    <p>A: Select the desired network using the <code>c &lt;SSID&gt; <strong>|</strong> connect &lt;SSID&gt;</code>
+        command. If
+        the network is secured, a password dialog will appear for you to enter the required
+        credentials.
     </p>
 
     <p><strong>Q: How do I disconnect from the current Wi-Fi network?</strong></p>
-    <p>A: Type <code>disconnect</code> into the command bar and press Enter.</p>
+    <p>A: Type <code>-d <strong>|</strong> disconnect</code> into the command bar and press Enter.</p>
 
     <p><strong>Q: Can I connect to hidden networks (networks that don't broadcast their SSID)?</strong></p>
     <p>A: Currently, the application primarily lists networks detected during scans. Connecting to hidden networks might
-        require using the native Windows Wi-Fi manager (accessible via the <code>wifi-manager</code> command).</p>
+        require using the native Windows Wi-Fi manager (accessible via the
+        <code>-w <strong>|</strong> wifi-manager</code> command).
+    </p>
 
     <p><strong>Q: How can I see the password I'm typing?</strong></p>
     <p>A: There should be a "Show Password" checkbox or icon next to the password input field that appears when you
@@ -61,18 +70,12 @@
 
     <h2 id="commands-faq">Commands</h2>
     <p><strong>Q: How do I know which commands are available?</strong></p>
-    <p>A: Type <code>help</code> in the command bar and press Enter. A list of commands and their descriptions will
-        appear in the output box. You can also refer to the <a href="basic_features.html#available-commands">Basic
+    <p>A: You can refer to the <a href="basic_features.html#available-commands">Basic
             Features</a> documentation.</p>
 
     <p><strong>Q: Why do commands like <code>shutdown</code> or <code>reboot</code> require confirmation?</strong></p>
     <p>A: These are potentially disruptive actions, so the application asks for confirmation to prevent accidental
         system shutdowns or restarts.</p>
-
-    <p><strong>Q: Why do some commands require administrator privileges?</strong></p>
-    <p>A: Actions like scanning for networks, connecting/disconnecting, or initiating system power commands often
-        require higher permissions from the operating system for security reasons. Running the application as an
-        administrator grants these permissions.</p>
 
     <h2 id="other-faq">Other</h2>
     <p><strong>Q: Where is the settings menu?</strong></p>

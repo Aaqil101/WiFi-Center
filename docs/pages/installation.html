@@ -19,8 +19,6 @@
         <li>Python: Version 3.9 or higher installed and added to your system's PATH.</li>
         <li>Dependencies: Requires packages listed in <code>requirements.txt</code>, including PyQt6, Cython, and NumPy.
         </li>
-        <li>Privileges: Administrator privileges are required for certain Wi-Fi operations like scanning and
-            connecting/disconnecting networks. The application may prompt for elevation if needed.</li>
     </ul>
 
     <h3 id="installation-steps">Installation Steps (Running from Source)</h3>
@@ -37,28 +35,34 @@
         <li>
             <strong>(Optional but Recommended) Create a Virtual Environment:</strong> To avoid conflicts with other
             Python projects, it's best to create and activate a virtual environment:
-            <pre><code>python -m venv .venv
-# On Windows PowerShell:
-.\.venv\Scripts\Activate.ps1
-# On Windows Command Prompt (cmd.exe):
-.\.venv\Scripts\activate.bat
-# On macOS/Linux:
-source .venv/bin/activate</code></pre>
+            <pre><code>python -m venv .venv</code></pre>
         </li>
         <li>
-            <strong>Install Requirements:</strong> Install all necessary dependencies using pip. This step will also
-            compile the Cython extension (`core/scanner/wifi_scanner_cy.pyx`) needed for efficient network scanning:
+            <strong>Activate the Virtual Environment:</strong> Use the following command to activate the virtual
+            environment:
+            <pre><code>.\.venv\Scripts\activate</code></pre>
+        </li>
+        <li>
+            <strong>Install Requirements:</strong> Install all necessary dependencies using pip:
             <pre><code>pip install -r requirements.txt</code></pre>
-            <em>Note: This may take a few moments as it downloads packages and compiles the Cython code. Ensure you have
-                a C/C++ compiler installed if you encounter issues during this step (e.g., Microsoft C++ Build Tools on
-                Windows).</em>
+        </li>
+        <li>
+            <strong>Build Cython Extensions:</strong> Compile the Cython extensions for better performance. Run the
+            following command:
+            <pre><code>cd core/scanner</code></pre>
+            <pre><code>python setup.py build_ext --inplace</code></pre>
+            <em>
+                <strong>Note:</strong> This may take a few moments as it compiles the Cython code. Ensure you have
+                a C/C++ compiler installed if you encounter issues during this step (e.g., <a
+                    href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" target="_blank">Microsoft C++
+                    Build Tools</a> on
+                Windows).
+            </em>
         </li>
         <li>
             <strong>Run the Application:</strong> Start the main application by running the <code>master.py</code>
             script:
             <pre><code>python master.py</code></pre>
-            <em>Remember to run this command with administrator privileges if you encounter issues with Wi-Fi scanning
-                or connection management.</em>
         </li>
     </ol>
 
@@ -72,10 +76,11 @@ source .venv/bin/activate</code></pre>
     <p>
         To build it, navigate to the <code>core/scanner/</code> directory and run the provided PowerShell script:
     </p>
-    <pre><code>cd core/scanner
-powershell -ExecutionPolicy Bypass -File .\build_executable.ps1</code></pre>
+    <pre><code>cd core/scanner</code></pre>
+    <pre><code>.\build_scanner.ps1</code></pre>
     <p>This script handles setting up a virtual environment (if needed), running PyInstaller, and placing the final
-        <code>WiFi-Scanner.exe</code> in the <code>core/scanner/</code> directory.</p>
+        <code>WiFi-Scanner.exe</code> in the <code>core/scanner/</code> directory.
+    </p>
 
     <button onclick="location.href='troubleshooting.html'" class="btn">Troubleshooting Installation</button>
 </body>

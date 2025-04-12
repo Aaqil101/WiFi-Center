@@ -9,24 +9,38 @@
 
 <body>
     <h1 id="troubleshooting">Troubleshooting Guide</h1>
-    <p>If you encounter problems while installing or using Wi-Fi Center, consult the common issues and solutions below.
+    <p>
+        If you encounter problems while installing or using Wi-Fi Center, consult the common issues and solutions below.
     </p>
+    <p>It covers the following topics:</p>
+    <ul>
+        <li><a href="#installation-issues">Installation Issues</a></li>
+        <li><a href="#scanning-issues">Background Wi-Fi Scanner</a></li>
+        <li><a href="#connection-issues">Connection Issues</a></li>
+        <li><a href="#general-issues">General Issues</a></li>
+        <li><a href="#getting-more-help">Getting More Help</a></li>
+    </ul>
 
     <h2 id="installation-issues">Installation Issues</h2>
     <ul>
         <li>
             <strong>Issue:</strong> Error during <code>pip install -r requirements.txt</code>, especially related to
             Cython or NumPy.
-            <p><strong>Solution:</strong> Ensure you have Python 3.9+ and pip installed correctly. You might also need a
-                C/C++ compiler for Cython. On Windows, install the <a
-                    href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" target="_blank">Microsoft C++
-                    Build Tools</a> (select "Desktop development with C++" during installation). Try running the pip
-                install command again in an administrator terminal.</p>
+            <p>
+                <strong>Solution:</strong> Ensure you have Python 3.9+ and pip installed correctly. You might also need
+                a C/C++ compiler for Cython. On Windows, install the
+                <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/" target="_blank">
+                    Microsoft C++ Build Tools
+                </a>
+                (select "Desktop development with C++" during installation). Try running the pip
+                install command again in an administrator terminal.
+            </p>
         </li>
         <li>
             <strong>Issue:</strong> Application fails to start after installation.
-            <p><strong>Solution:</strong> Double-check that all requirements were installed successfully. Ensure you are
-                running the application from the correct directory (the root `WiFi-Center` folder) using
+            <p>
+                <strong>Solution:</strong> Double-check that all requirements were installed successfully. Ensure you
+                are running the application from the correct directory (the root `WiFi-Center` folder) using
                 <code>python master.py</code>. Check if you activated your virtual environment (if you created one).
             </p>
         </li>
@@ -44,7 +58,7 @@
                 <li>Check if the background scanner process (<code>core/scanner/wifi_scanner.py</code>) is running. Look
                     for its icon in the system tray. If it's not there, try restarting the main application. If it is
                     there, right-click it, select "Show Console", and check the logs for errors.</li>
-                <li>Try the <code>refresh</code> command in the command bar.</li>
+                <li>Try the <code>-r <strong>|</strong> refresh</code> command in the command bar.</li>
                 <li>Ensure no other application is exclusively controlling the Wi-Fi adapter.</li>
             </ol>
             </p>
@@ -54,10 +68,12 @@
             <p><strong>Solution:</strong>
             <ol>
                 <li>Try running <code>python core/scanner/wifi_scanner.py</code> directly from the terminal (with
-                    administrator privileges) to see if any errors are printed.</li>
+                    administrator privileges) to see if any errors are printed.
+                </li>
                 <li>Check if another instance is already running (the scanner prevents multiple instances). You might
                     need to use Task Manager to find and terminate existing `python.exe` or `WiFi-Scanner.exe` processes
-                    related to this application.</li>
+                    related to this application.
+                </li>
                 <li>Ensure all dependencies from <code>requirements.txt</code> are installed correctly.</li>
             </ol>
             </p>
@@ -65,7 +81,8 @@
         <li>
             <strong>Issue:</strong> Scan results seem outdated or slow.
             <p><strong>Solution:</strong> The background scanner runs at a set interval (default 0.5 seconds). You can
-                force an immediate scan using the <code>refresh</code> command in the main app or the "Force Scan Now"
+                force an immediate scan using the <code>-r <strong>|</strong> refresh</code> command in the main app or
+                the "<strong>Force Scan Now</strong>"
                 button in the scanner console. Check the scanner console logs for any performance warnings or errors.
             </p>
         </li>
@@ -79,11 +96,14 @@
             <ol>
                 <li>Double-check that you entered the correct password. Passwords are case-sensitive.</li>
                 <li>Ensure you have selected the correct network (SSID).</li>
-                <li>Try connecting using the native Windows Wi-Fi manager (use the <code>wifi-manager</code> command) to
-                    see if the issue is specific to Wi-Fi Center.</li>
+                <li>
+                    Try connecting using the native Windows Wi-Fi manager (use the
+                    <code>-w <strong>|</strong> wifi-manager</code> command) to
+                    see if the issue is specific to Wi-Fi Center.
+                </li>
                 <li>Run Wi-Fi Center with administrator privileges, as connecting sometimes requires them.</li>
                 <li>Check the signal strength. Weak signals can cause connection failures.</li>
-                <li>Restart your Wi-Fi router and your computer.</li>
+                <li>Restart your Wi-Fi router.</li>
             </ol>
             </p>
         </li>

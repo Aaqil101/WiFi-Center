@@ -178,11 +178,11 @@ class CommandProcessor:
                 # Show the output box with animation
                 show_output_box_with_animation(self.window)
 
-                # Hide the output box after 3 seconds and enable the command bar
+                # Hide the output box after 1.5 seconds and enable the command bar
                 QTimer.singleShot(
-                    3000, lambda: hide_output_box_with_animation(self.window)
+                    1500, lambda: hide_output_box_with_animation(self.window)
                 )
-                QTimer.singleShot(3300, lambda: processing(self.window, end=True))
+                QTimer.singleShot(1800, lambda: processing(self.window, end=True))
 
                 return True
             else:

@@ -88,17 +88,13 @@ Write-Host "|| Building the executable...         ||" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # Execute the PyInstaller command
+# --runtime-tmpdir="." `
 pyinstaller --name "WiFi-Center" --onefile --windowed `
-    --runtime-tmpdir="." `
     --icon="assets\master_icon.ico" `
     --add-data="styles:styles" `
     --add-data="assets:assets" `
     --add-data="core:core" `
     --add-data="helpers:helpers" `
-    --add-data="core/scanner:core/scanner" `
-    --add-data="core/scanner/assets:core/scanner/assets" `
-    --add-data="core/scanner/styles:core/scanner/styles" `
-    --add-data="core/scanner/scan_helpers:core/scanner/scan_helpers" `
     .\master.py
 
 Write-Host "========================================" -ForegroundColor Green

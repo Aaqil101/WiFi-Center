@@ -50,7 +50,7 @@ class WifiCache:
 
 
 # Constants
-WIFI_DATA_FILE: Path = Path(__file__).parent / "scanner" / "wifi_data.json"
+WIFI_DATA_FILE: Path = Path(__file__).parent / "wifi_data.json"
 
 # Global WiFi cache instance
 _wifi_cache = WifiCache(timeout_seconds=10)
@@ -129,7 +129,7 @@ def start_wifi_scanner() -> None:
     """
     try:
         # Determine the full path to the script
-        script_path: Path = Path(__file__).parent / "scanner" / "wifi_scanner.py"
+        script_path: Path = Path(__file__).parent / "wifi_scanner.py"
 
         if not script_path.exists():
             raise FileNotFoundError(f"wifi_scanner.py not found at {script_path}")

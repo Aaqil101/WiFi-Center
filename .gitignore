@@ -171,6 +171,4 @@ cython_debug/
 #.idea/
 
 # Core Items
-core/scanner/wifi_data.json
-core/scanner/_MEI*/
-core/scanner/WiFi-Scanner.exe
+core/wifi_data.json

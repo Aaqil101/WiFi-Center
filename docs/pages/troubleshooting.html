@@ -55,7 +55,7 @@
                 <li>Ensure your computer's Wi-Fi adapter is enabled.</li>
                 <li>Run Wi-Fi Center with administrator privileges (right-click the script or shortcut and select "Run
                     as administrator"). Scanning often requires elevated permissions.</li>
-                <li>Check if the background scanner process (<code>core/scanner/wifi_scanner.py</code>) is running. Look
+                <li>Check if the background scanner process (<code>core/wifi_scanner.py</code>) is running. Look
                     for its icon in the system tray. If it's not there, try restarting the main application. If it is
                     there, right-click it, select "Show Console", and check the logs for errors.</li>
                 <li>Try the <code>-r <strong>|</strong> refresh</code> command in the command bar.</li>
@@ -67,7 +67,7 @@
             <strong>Issue:</strong> The background scanner (system tray icon) is not running or crashes.
             <p><strong>Solution:</strong>
             <ol>
-                <li>Try running <code>python core/scanner/wifi_scanner.py</code> directly from the terminal (with
+                <li>Try running <code>python core/wifi_scanner.py</code> directly from the terminal (with
                     administrator privileges) to see if any errors are printed.
                 </li>
                 <li>Check if another instance is already running (the scanner prevents multiple instances). You might

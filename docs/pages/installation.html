@@ -13,7 +13,7 @@
         Welcome to the installation guide! This guide will help you set up the application on your system. Follow the
         steps below to install the application successfully.
     </p>
-    <h3 id="system-requirements">System Requirements</h3>
+    <h2 id="system-requirements">System Requirements</h2>
     <ul>
         <li>Operating System: Windows 10 or newer</li>
         <li>Python: Version 3.9 or higher installed and added to your system's PATH.</li>
@@ -49,7 +49,7 @@
         <li>
             <strong>Build Cython Extensions:</strong> Compile the Cython extensions for better performance. Run the
             following command:
-            <pre><code>cd core/scanner</code></pre>
+            <pre><code>cd .\core\</code></pre>
             <pre><code>python setup.py build_ext --inplace</code></pre>
             <em>
                 <strong>Note:</strong> This may take a few moments as it compiles the Cython code. Ensure you have
@@ -65,22 +65,6 @@
             <pre><code>python master.py</code></pre>
         </li>
     </ol>
-
-    <h3 id="building-standalone-scanner-optional">Building Standalone Scanner (Optional)</h3>
-    <p>
-        The project includes a separate, optimized Wi-Fi scanner component in the <code>core/scanner/</code> directory.
-        While the main application uses its compiled Cython version, you can also build a standalone
-        <code>WiFi-Scanner.exe</code> using PyInstaller. This is generally intended for development or distribution
-        purposes.
-    </p>
-    <p>
-        To build it, navigate to the <code>core/scanner/</code> directory and run the provided PowerShell script:
-    </p>
-    <pre><code>cd core/scanner</code></pre>
-    <pre><code>.\build_scanner.ps1</code></pre>
-    <p>This script handles setting up a virtual environment (if needed), running PyInstaller, and placing the final
-        <code>WiFi-Scanner.exe</code> in the <code>core/scanner/</code> directory.
-    </p>
 
     <button onclick="location.href='troubleshooting.html'" class="btn">Troubleshooting Installation</button>
 </body>

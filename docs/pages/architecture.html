@@ -59,37 +59,23 @@
                     (e.g., `pywifi`).
                 </li>
                 <li>
-                    <code><a href="https://github.com/Aaqil101/WiFi-Center/tree/master/core/scanner">scanner/</a></code>:
-                    Contains the separate background
-                    Wi-Fi scanner application (see
-                    <a href="advanced_features.html#background-scanner">Advanced Topics</a>).
-                    <ul>
-                        <li>
-                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/wifi_scanner.py">wifi_scanner.py</a></code>:
-                            Main script for
-                            the background scanner tray application.
-                        </li>
-                        <li>
-                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/wifi_scanner_cy.pyx">wifi_scanner_cy.pyx</a></code>:
-                            Cython source
-                            file for optimized scanning logic.
-                        </li>
-                        <li>
-                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/setup.py">setup.py</a></code>:
-                            Used to build the Cython
-                            extension.
-                        </li>
-                        <li>
-                            <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/scanner/build_executable.ps1">build_executable.ps1</a></code>:
-                            Script to
-                            build a standalone `.exe` of the scanner using
-                            PyInstaller (optional).
-                        </li>
-                        <li>
-                            <code>wifi_data.json</code>: Output file where
-                            the scanner writes detected network data.
-                        </li>
-                    </ul>
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_scanner.py">wifi_scanner.py</a></code>:
+                    Main script for
+                    the background scanner tray application.
+                </li>
+                <li>
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/wifi_scanner_cy.pyx">wifi_scanner_cy.pyx</a></code>:
+                    Cython source
+                    file for optimized scanning logic.
+                </li>
+                <li>
+                    <code><a href="https://github.com/Aaqil101/WiFi-Center/blob/master/core/setup.py">setup.py</a></code>:
+                    Used to build the Cython
+                    extension.
+                </li>
+                <li>
+                    <code>wifi_data.json</code>: Output file where
+                    the scanner writes detected network data.
                 </li>
             </ul>
         </li>
@@ -171,7 +157,7 @@
         The following diagram illustrates the basic flow of information and
         interaction between key components:
     </p>
-    <img src="../assets/images/architecture_diagram_v02.svg" alt="Architecture Diagram"
+    <img src="../assets/images/architecture_diagram_v03.svg" alt="Architecture Diagram"
         style="max-width: 100%; height: auto;">
     <p>
         <em>Note: This is a simplified representation. Actual interactions

@@ -20,7 +20,7 @@
     <h2 id="background-scanner">Background Wi-Fi Scanner</h2>
     <p>
         Wi-Fi Center utilizes a separate background process for continuous network scanning, located in the
-        <code>core/scanner/</code> directory. This process runs independently and provides network data to the main
+        <code>core/</code> directory. This process runs independently and provides network data to the main
         application.
     </p>
 
@@ -30,7 +30,7 @@
             detect nearby Wi-Fi networks.</li>
         <li><strong>Data Output:</strong> Saves the top 6 detected networks (based on signal strength) along with their
             SSID, signal strength (%), whether login is required, and the last seen timestamp to a JSON file:
-            <code>core/scanner/wifi_data.json</code>. The main Wi-Fi Center application reads this file to populate its
+            <code>core/wifi_data.json</code>. The main Wi-Fi Center application reads this file to populate its
             network list.
         </li>
         <li><strong>Cython Optimization:</strong> Uses a pre-compiled Cython module (<code>wifi_scanner_cy.pyd</code>
@@ -81,11 +81,6 @@
             control the look of the main window, buttons, table, command bar, etc. Specific files like
             <code>win10.qss</code> and <code>win11.qss</code> apply base styles depending on the operating system.
         </li>
-        <li><strong>Scanner Console Styles:</strong> QSS files in <code>core/scanner/styles/</code> control the
-            appearance of the scanner's console window elements (log display, buttons, labels). It also uses
-            <code>win10.qss</code> and <code>win11.qss</code> for OS-specific base styling, including blur effects on
-            Windows 11.
-        </li>
     </ul>
     <p>You can modify these QSS files to change colors, fonts, borders, and other visual aspects.</p>
 
@@ -95,10 +90,7 @@
     </p>
     <ul>
         <li><strong>Main Application Assets (<code>assets/</code>):</strong> Contains icons used in the main Wi-Fi
-            Center window (e.g., <code>master_icon.png</code>, <code>connect_to_wifi_icon.png</code>).</li>
-        <li><strong>Scanner Assets (<code>core/scanner/assets/</code>):</strong> Contains icons specifically for the
-            background scanner, such as the tray icon (<code>wifi_scanner_tray_icon.png</code>) and the console window
-            icon (<code>wifi_scanner_window_icon.png</code>).</li>
+            Center window (e.g., <code>master_icon.png</code>, <code>connect_to_wifi_icon.png</code> etc...).</li>
         <li><strong>Documentation Assets (<code>docs/assets/</code>):</strong> Contains CSS, JavaScript, and icons used
             for rendering this documentation viewer.</li>
     </ul>

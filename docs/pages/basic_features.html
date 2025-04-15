@@ -29,10 +29,12 @@
         </li>
         <li>
             <strong id="connection-manager">Connection Manager:</strong> Connects to and manages Wi-Fi networks.
-            <p>To connect to a network, select it from the table. If the network requires a password, an input field
-                will appear. Enter the password and click the 'Connect' button or press Enter. Connection status
-                (success or failure) will be shown in the Output Box below the command bar. You can also connect using
-                the <code>connect "Network Name"</code> command.</p>
+            <p>To connect to a Wi-Fi network, you can use the command bar to execute the connection command. Simply type
+                <code>-c &lt;SSID&gt; <strong>|</strong> connect &lt;SSID&gt;</code>, where <code>&lt;SSID&gt;</code> is
+                the name of the network you wish to connect to.
+                If the network is secured, the application will prompt you to enter the required password to complete
+                the connection process.
+            </p>
         </li>
         <li>
             <strong id="command-bar">Command Bar:</strong> Executes commands for various actions.
@@ -74,14 +76,10 @@
             <code>-w <strong>|</strong> wifi-manager</code> ➜ Opens the native Windows Wi-Fi settings panel.
         </li>
         <li>
-            <code>c &lt;SSID&gt; <strong>|</strong>connect &lt;SSID&gt;</code> ➜ Attempts to connect to the
+            <code>-c &lt;SSID&gt; <strong>|</strong>connect &lt;SSID&gt;</code> ➜ Attempts to connect to the
             specified
-            network SSID or name. If the network is secured, a password dialog will appear for you to enter the required
+            network SSID. If the network is secured, a password dialog will appear for you to enter the required
             credentials.
-        </li>
-        <li>
-            <em>Note: If the SSID contains spaces, enclose it in double quotes. Example:
-                <code>connect "My Network" <strong>|</strong> c "My Network"</code></em>
         </li>
         <li>
             <code>-r <strong>|</strong> refresh</code> ➜ Initiates a new scan for available Wi-Fi networks and updates
@@ -109,7 +107,7 @@
             <em>Note: You can combine multiple commands using the <code>&amp;&amp;</code> operator. For example, to
                 refresh
                 the network list and then connect to a network, you can use:
-                <code>refresh && connect "My Network"</code>.</em>
+                <code>refresh && connect My Network</code>.</em>
         </li>
     </ul>
 

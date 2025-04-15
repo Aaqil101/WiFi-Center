@@ -1,0 +1,26 @@
+[
+    {
+        "ssid": "HILLCOM",
+        "strength": 100,
+        "requires_login": false,
+        "last_seen": "2025-04-15 16:50:52"
+    },
+    {
+        "ssid": "Dialog 4G 613",
+        "strength": 24,
+        "requires_login": true,
+        "last_seen": "2025-04-15 16:50:52"
+    },
+    {
+        "ssid": "Dialog 4G",
+        "strength": 18,
+        "requires_login": true,
+        "last_seen": "2025-04-15 16:50:52"
+    },
+    {
+        "ssid": "Dialog 4G 669_EXT",
+        "strength": 16,
+        "requires_login": true,
+        "last_seen": "2025-04-15 16:50:52"
+    }
+]

@@ -2,7 +2,6 @@
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from turtle import width
 
 # PyQt6 Modules
 from PyQt6.QtGui import QIcon

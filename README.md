@@ -78,34 +78,26 @@ Use the command bar at the bottom of the application window to enter commands:
 
     ```bash
     connect <SSID>
-    # or
-    -c <SSID>
     ```
 
-    *(Replace `<SSID>` with the actual network name. You'll be prompted for a password if required.)*
+    *(Replace `<SSID>` with the **actual network name**. You'll be prompted for a password if required.)*
 
 * **Disconnect from the current network:**
 
     ```bash
     disconnect
-    # or
-    -d
     ```
 
 * **Refresh the network list:**
 
     ```bash
     refresh
-    # or
-    -r
     ```
 
 * **Get help:**
 
     ```bash
     --help
-    # or
-    -h
     ```
 
 * **Chain commands:** Use `&&` to run multiple commands sequentially.
@@ -118,5 +110,4 @@ Use the command bar at the bottom of the application window to enter commands:
 
     ```bash
     quit
-    # or exit, close, terminate
     ```

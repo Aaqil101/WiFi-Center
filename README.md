@@ -3,7 +3,7 @@
 An application that allows users to connect to and disconnect from Wi-Fi using only the keyboard.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
-[![Core README](https://img.shields.io/badge/Core-README-blue)](Core/README.md)
+[![Core README](https://img.shields.io/badge/Core-README-blue)](https://github.com/Aaqil101/WiFi-Center/tree/master/core#readme)
 [![Python](https://img.shields.io/badge/Python-3.13%2B-yellow)](https://www.python.org/)
 [![GitHub stars](https://img.shields.io/github/stars/Aaqil101/WiFi-Center.svg)](https://github.com/Aaqil101/WiFi-Center/stargazers)
 
